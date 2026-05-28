@@ -1,0 +1,9 @@
+
+spring:
+  application:
+    name: auth
+  profiles:
+    active: dev
+
+jwt:
+  expiration: 860000
