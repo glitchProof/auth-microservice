@@ -1,8 +1,8 @@
 package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
+import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.glitchproof.auth.features.auth.dto.RegisterRequest;
 import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.core.exception.DomainException;
@@ -37,7 +37,6 @@ public class PasswordAuthServiceImpl
         }catch (AuthenticationException e) {
             throw new DomainException(AuthException.CREDENTIALS_NOT_VALID);
         }
-
 
         userService.updateLastLogin(loginRequest.email());
 
