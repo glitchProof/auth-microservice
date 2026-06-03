@@ -1,16 +1,17 @@
 package org.glitchproof.auth.config.security;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.ServletException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
+import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.glitchproof.auth.features.token.service.JwtService;
@@ -24,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFilter
@@ -78,6 +80,8 @@ public class JwtFilter
                 default -> JwtException.INVALID;
             };
 
+            log.error(e.getMessage());
+
             handlerExceptionResolver
                     .resolveException(
                             request,
@@ -90,6 +94,8 @@ public class JwtFilter
         }
 
         catch (Exception e) {
+            log.error(e.getMessage());
+
             handlerExceptionResolver
                     .resolveException(request, response, null, new DomainException(JwtException.INVALID));
             return;
