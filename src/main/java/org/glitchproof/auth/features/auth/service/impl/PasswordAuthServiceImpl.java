@@ -1,8 +1,11 @@
 package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.glitchproof.auth.features.user.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.glitchproof.auth.features.auth.mapper.AuthMapper;
+import org.glitchproof.auth.features.user.enums.AuthProvider;
 import org.springframework.stereotype.Service;
+import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.glitchproof.auth.features.auth.dto.RegisterRequest;
 import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.core.exception.DomainException;
@@ -15,14 +18,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.glitchproof.auth.features.auth.dto.credentials.PasswordAuthRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PasswordAuthServiceImpl
         implements PasswordAuthService {
 
     private final JwtService jwtService;
+    private final AuthMapper authMapper;
     private final UserService userService;
-    private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -38,14 +42,11 @@ public class PasswordAuthServiceImpl
             throw new DomainException(AuthException.CREDENTIALS_NOT_VALID);
         }
 
+        log.info("Login for {}", loginRequest.email());
 
         userService.updateLastLogin(loginRequest.email());
 
-        String accessToken = jwtService.generateAccessToken(loginRequest.email());
-        String refreshToken = jwtService.generateRefreshToken(loginRequest.email());
-
-
-        return new TokenResponse(accessToken, refreshToken);
+        return jwtService.generatePairToken(loginRequest.email());
     }
 
     @Override
@@ -64,15 +65,15 @@ public class PasswordAuthServiceImpl
             );
         }
 
-        userService.createUser(
-                userMapper
-                        .registerRequestToCreateUserRequest(registerRequest)
-        );
+        var newUser = authMapper
+                .registerRequestToCreateUserRequest(registerRequest);
 
-        String accessToken = jwtService.generateAccessToken(registerRequest.getEmail());
-        String refreshToken = jwtService.generateRefreshToken(registerRequest.getEmail());
+        newUser.setProvider(AuthProvider.PASSWORD);
 
+        userService.createUser(newUser);
 
-        return new TokenResponse(accessToken, refreshToken);
+        log.info("New User {} has been created", newUser);
+
+        return jwtService.generatePairToken(registerRequest.getEmail());
     }
 }

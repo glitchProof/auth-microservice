@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 
 
 @RequiredArgsConstructor
-public enum JwtExceptions implements ExceptionDefinition {
+public enum JwtException implements ExceptionDefinition {
     INVALID(DomainExceptionHolder.of(
             HttpStatus.UNAUTHORIZED,
             10101,
@@ -29,7 +29,6 @@ public enum JwtExceptions implements ExceptionDefinition {
     );
 
     private final DomainExceptionHolder domainExceptionHolder;
-
 
     @Override
     public DomainExceptionHolder getDomainExceptionHolder() {

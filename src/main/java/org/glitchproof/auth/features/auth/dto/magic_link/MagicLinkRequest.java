@@ -1,0 +1,10 @@
+package org.glitchproof.auth.features.auth.dto.magic_link;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record MagicLinkRequest (
+    @Email
+    @NotBlank
+    String email
+){}

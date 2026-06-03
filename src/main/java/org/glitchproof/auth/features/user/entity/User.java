@@ -1,14 +1,12 @@
 package org.glitchproof.auth.features.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.*;
+import jakarta.persistence.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
+import org.glitchproof.auth.features.user.enums.AuthProvider;
 
 import java.time.LocalDateTime;
 
@@ -33,12 +31,17 @@ public class User {
     @Column(nullable = false)
     String username;
 
-    @Column(name="password_hash",nullable = false)
+    @Column(name="password_hash")
     String passwordHash;
 
     @Column(unique = true, nullable = false)
     String email;
 
+    @Column(unique = true)
+    String googleSubId;
+
+    @Enumerated(EnumType.STRING)
+    AuthProvider provider;
 
     @Column(
             name = "last_login",

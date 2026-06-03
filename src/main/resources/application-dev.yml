@@ -9,5 +9,9 @@ spring:
     hibernate:
       ddl-auto: update
 
-jwt:
-  secret: asdasd8127saiugdh237891saxcjkne890ruw8cdsxaklngiuyeqrw8t7eqrwdhisua
+springdoc:
+  swagger-ui:
+    enabled: true
+
+  api-docs:
+    enabled: true

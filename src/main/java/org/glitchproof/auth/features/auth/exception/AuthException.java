@@ -8,6 +8,8 @@ import static org.glitchproof.auth.core.model.DomainExceptionHolder.of;
 import org.glitchproof.auth.core.model.ExceptionDefinition;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 public enum AuthException implements ExceptionDefinition {
     CREDENTIALS_NOT_VALID(of(
@@ -28,7 +30,25 @@ public enum AuthException implements ExceptionDefinition {
     PASSWORD_CONFIRM_NOT_MATCH(of(
             HttpStatus.BAD_REQUEST,
             10113,
-            "Passwords confirm do not match password"
+            "Passwords confirm do not match password",
+            Map.of(
+                    "passwordConfirm", "Password confirm not match with password"
+            )
+    )),
+    OAUTH_TOKEN_NOT_VALID(of(
+               HttpStatus.UNAUTHORIZED,
+               10114,
+               "Token is invalid or expired"
+    )),
+    MAGIC_LINK_ONLY_SEND_REGISTERED(of(
+                    HttpStatus.NOT_FOUND,
+                    10115,
+                    "Magic link only work registered user's"
+    )),
+    MAGIC_LINK_INVALID(of(
+            HttpStatus.BAD_REQUEST,
+            10116,
+            "Magic link invalid"
     ));
 
     private final DomainExceptionHolder domainExceptionHolder;

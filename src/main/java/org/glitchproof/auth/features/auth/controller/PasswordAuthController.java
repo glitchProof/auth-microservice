@@ -20,26 +20,33 @@ import org.glitchproof.auth.features.auth.dto.credentials.PasswordAuthRequest;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth/with-credentials")
+@RequestMapping("/api/v1/auth")
 public class PasswordAuthController {
     private final PasswordAuthService passwordAuthService;
 
-    @PostMapping("/login")
+    @PostMapping("/login/with-credentials")
     @Operation(
             tags = "Authentication",
-            summary = "Login with email and password",
-            responses =  {
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Authenticated failed (Missing invalid credentials)",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(
-                                            implementation = ApiExceptionResponse.class
-                                    )
-                            )
+            summary = "Login with email and password"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = TokenResponse.class
                     )
-            }
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Authenticated failed (Missing invalid credentials)",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = ApiExceptionResponse.class
+                    )
+            )
     )
     public ResponseEntity<TokenResponse> login(
             @Valid @RequestBody PasswordAuthRequest credentials
@@ -51,23 +58,29 @@ public class PasswordAuthController {
 
 
 
-    @PostMapping("/register")
+    @PostMapping("/register/with-credentials")
     @Operation(
             tags = "Authentication",
-            summary = "Register with credentials",
-            responses =  {
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Authenticated failed (Missing invalid credentials)",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(
-                                            implementation = ApiExceptionResponse.class
-                                    )
-                            )
+            summary = "Register with credentials"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Authenticated failed (Missing invalid credentials)",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = ApiExceptionResponse.class
                     )
-            }
-
+            )
+    )
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = TokenResponse.class
+                    )
+            )
     )
     public ResponseEntity<TokenResponse> register(
           @Valid @RequestBody RegisterRequest registerRequest
@@ -76,6 +89,5 @@ public class PasswordAuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
 
 }
