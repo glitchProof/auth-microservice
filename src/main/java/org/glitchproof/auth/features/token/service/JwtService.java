@@ -78,7 +78,6 @@ public class JwtService {
         return !isTokenExpired(token) && tokenType.equals(getTokenType(token));
     }
 
-
     public Boolean isTokenExpired(String token) {
         return getClaim(token, Claims::getExpiration).before(new Date());
     }
@@ -100,6 +99,10 @@ public class JwtService {
     }
 
     public TokenType getTokenType(String token) {
-        return getClaim(token, claims -> claims.get("type", TokenType.class));
+        return getClaim(token, claims -> {
+            String type = claims.get("type", String.class);
+
+            return TokenType.valueOf(type);
+        });
     }
 }
