@@ -5,28 +5,29 @@ import lombok.experimental.FieldDefaults;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.glitchproof.auth.features.user.enums.AuthProvider;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PROTECTED)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Schema(description = "user creation request")
-public class CreateUserRequest {
+public class CreateUserDto {
     @NotBlank
-    @Schema(examples = "Jhon Doe")
     String fullName;
 
     @NotBlank
-    @Schema(examples = "Named_king")
     String username;
 
     @NotBlank
-    @Schema(examples = "WriteBetterPassword123")
     String password;
 
     @NotBlank
     @Email
-    @Schema(examples = "namedking@gmail.com")
     String email;
+
+    String googleSubId;
+
+    AuthProvider provider;
 }

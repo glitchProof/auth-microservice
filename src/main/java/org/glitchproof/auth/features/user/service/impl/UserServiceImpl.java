@@ -2,13 +2,15 @@ package org.glitchproof.auth.features.user.service.impl;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.user.entity.User;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.glitchproof.auth.features.user.dto.UserResponse;
 import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.glitchproof.auth.features.user.service.UserService;
-import org.glitchproof.auth.features.user.dto.CreateUserRequest;
+import org.glitchproof.auth.features.user.dto.CreateUserDto;
 import org.glitchproof.auth.features.user.exception.UserException;
 import org.glitchproof.auth.features.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl
@@ -33,39 +36,43 @@ public class UserServiceImpl
     }
 
     @Override
-    public UserResponse createUser(@Valid CreateUserRequest createUserRequest) {
-        if(userRepository.existsByUsernameOrEmail(createUserRequest.getUsername(), createUserRequest.getEmail())){
+    public UserResponse createUser(@Valid CreateUserDto createUserDto) {
+        if(userRepository.existsByUsernameOrEmail(createUserDto.getUsername(), createUserDto.getEmail())){
             throw new DomainException(UserException.USERNAME_AND_EMAIL_EXISTS);
         }
 
-        User user = userMapper.createUserRequestToUserEntity(createUserRequest);
+        User user = userMapper.createUserRequestToUserEntity(createUserDto);
 
         user.setLastLogin(LocalDateTime.now());
-        user.setPasswordHash(passwordEncoder.encode(createUserRequest.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
 
         userRepository.save(user);
 
-        return UserResponse.builder()
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .lastLogin(user.getLastLogin())
-                .fullName(user.getFullName())
-                .build();
+        return userMapper.userEntityToUserResponse(user);
+    }
+
+    @Override
+    public UserResponse updateUser(String email, UpsertUserDto upsertUser) {
+        var user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+
+        userMapper.upsertUser(upsertUser, user);
+
+        userRepository.save(user);
+
+        return userMapper.userEntityToUserResponse(user);
     }
 
 
     @Override
     public void updateLastLogin(String email) {
-        userRepository.findByEmail(email)
-                .map((user) -> {
-
-                    user.setLastLogin(LocalDateTime.now());
-
-                    userRepository.save(user);
-
-                    return Boolean.TRUE;
-                })
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found email: " + email));
+
+        user.setLastLogin(LocalDateTime.now());
+
+        userRepository.save(user);
     }
 
 
@@ -77,6 +84,11 @@ public class UserServiceImpl
     @Override
     public Boolean existsByUsernameOrEmail(String username, String email) {
         return userRepository.existsByUsernameOrEmail(username, email);
+    }
+
+    @Override
+    public Boolean existsByGoogleSubId(String googleSubId) {
+        return userRepository.existsByGoogleSubId(googleSubId);
     }
 
     @Override

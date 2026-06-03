@@ -11,4 +11,4 @@ RUN ./gradlew bootJar --no-daemon
 FROM eclipse-temurin:21-jre-jammy
 EXPOSE 8080
 COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-Xmx350m", "-Xms128m", "-XX:+UseContainerSupport", "-Dspring.profiles.active=prod", "-jar", "/app.jar"]

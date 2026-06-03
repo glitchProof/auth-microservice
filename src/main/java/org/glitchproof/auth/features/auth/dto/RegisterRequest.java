@@ -8,23 +8,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "auth register request")
 public class RegisterRequest {
     @NotBlank
-    @Schema(examples = "Jhon Doe")
+    @Schema(example = "Jhon Doe")
     String fullName;
 
     @NotBlank
-    @Schema(examples = "Named_king")
+    @Schema(example = "Named_king")
     String username;
 
     @NotBlank
-    @Schema(examples = "WriteBetterPassword123")
+    @Schema(example = "WriteBetterPassword123")
     String password;
 
     @NotBlank
     @Email
-    @Schema(examples = "namedking@gmail.com")
+    @Schema(example = "namedking@gmail.com")
     String email;
 
     @Schema(

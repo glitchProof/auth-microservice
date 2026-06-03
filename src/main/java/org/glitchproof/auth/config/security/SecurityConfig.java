@@ -2,9 +2,9 @@ package org.glitchproof.auth.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,7 +28,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1/auth/login/**", "/api/v1/auth/register/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 );

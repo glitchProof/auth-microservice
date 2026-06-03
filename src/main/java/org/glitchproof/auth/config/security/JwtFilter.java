@@ -2,11 +2,11 @@ package org.glitchproof.auth.config.security;
 
 import lombok.NonNull;
 import jakarta.servlet.FilterChain;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.ServletException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +17,7 @@ import org.glitchproof.auth.features.token.service.JwtService;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.glitchproof.auth.features.token.exception.JwtExceptions;
+import org.glitchproof.auth.features.token.exception.JwtException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +30,7 @@ public class JwtFilter
     extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailService;
+    private final UserDetailsService userDetailsService;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
@@ -54,9 +54,9 @@ public class JwtFilter
             Authentication authentication = securityContext.getAuthentication();
 
             if(email != null && authentication == null){
-                UserDetails userDetails = userDetailService.loadUserByUsername(email);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                if(jwtService.validate(token)) {
+                if(jwtService.validate(token, TokenType.ACCESS)) {
                     var authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -71,11 +71,11 @@ public class JwtFilter
             filterChain.doFilter(request, response);
 
         }
-        catch(JwtException e){
-            JwtExceptions error = switch(e){
-                case ExpiredJwtException _e -> JwtExceptions.EXPIRED;
-                case MalformedJwtException _e -> JwtExceptions.MALFORMED;
-                default -> JwtExceptions.INVALID;
+        catch(io.jsonwebtoken.JwtException e){
+            JwtException error = switch(e){
+                case ExpiredJwtException _e -> JwtException.EXPIRED;
+                case MalformedJwtException _e -> JwtException.MALFORMED;
+                default -> JwtException.INVALID;
             };
 
             handlerExceptionResolver
@@ -91,7 +91,7 @@ public class JwtFilter
 
         catch (Exception e) {
             handlerExceptionResolver
-                    .resolveException(request, response, null, new DomainException(JwtExceptions.INVALID));
+                    .resolveException(request, response, null, new DomainException(JwtException.INVALID));
             return;
         }
     }
