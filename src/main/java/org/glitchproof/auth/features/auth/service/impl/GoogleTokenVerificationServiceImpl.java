@@ -21,7 +21,7 @@ public class GoogleTokenVerificationServiceImpl
     private final String expectedClientId;
 
     public GoogleTokenVerificationServiceImpl(
-            @Value("${google.client-id}") String expectedClientId,
+            @Value("${app.oauth.google.client-id}") String expectedClientId,
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri
     ){
         this.expectedClientId = expectedClientId;

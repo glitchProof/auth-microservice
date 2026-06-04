@@ -1,4 +1,4 @@
-package org.glitchproof.auth.core.event;
+package org.glitchproof.auth.features.auth.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

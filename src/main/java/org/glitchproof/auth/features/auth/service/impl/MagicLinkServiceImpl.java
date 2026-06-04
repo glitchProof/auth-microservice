@@ -3,7 +3,7 @@ package org.glitchproof.auth.features.auth.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.glitchproof.auth.core.event.MagicLinkEvent;
+import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
 import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.springframework.beans.factory.annotation.Value;
 import org.glitchproof.auth.core.exception.DomainException;
@@ -25,7 +25,7 @@ public class MagicLinkServiceImpl
     private final UserService userService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Value("${magic-link.base-url}")
+    @Value("${app.magic-link.url}")
     private String magicLinkBaseUrl;
 
     @Override

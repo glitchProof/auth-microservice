@@ -29,7 +29,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
     implementation 'org.springframework:spring-context-support:7.0.7'
     implementation 'org.springframework.boot:spring-boot-starter-mail:4.0.6'
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
