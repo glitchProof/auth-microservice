@@ -53,20 +53,21 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
 
             mailSender.send(message);
 
+            redisTemplate
+                    .opsForValue()
+                    .set(
+                            email,
+                            MagicLinkStatus.UNUSED.name(),
+                            15,
+                            TimeUnit.MINUTES
+                    );
+
         } catch (MessagingException e) {
             log.error("Error when sending message: {}", e.getMessage());
         } catch (Exception e){
             log.error("Email sending exception: {}", e.getMessage());
         }
 
-        redisTemplate
-                .opsForValue()
-                .set(
-                        email,
-                        MagicLinkStatus.UNUSED.name(),
-                        15,
-                        TimeUnit.MINUTES
-                );
 
         log.info("Email send to {} with magicLink {}",  event.getEmail(), event.getMagicLink());
     }

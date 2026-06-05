@@ -1,6 +1,5 @@
 package org.glitchproof.auth.features.user.mapper;
 
-
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
