@@ -49,6 +49,11 @@ public enum AuthException implements ExceptionDefinition {
             HttpStatus.BAD_REQUEST,
             10116,
             "Magic link invalid"
+    )),
+    MAGIC_LINK_USED(of(
+            HttpStatus.BAD_REQUEST,
+            10117,
+            "Magic link used"
     ));
 
     private final DomainExceptionHolder domainExceptionHolder;

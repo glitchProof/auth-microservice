@@ -38,7 +38,8 @@ public class MagicController {
             @RequestParam String token
     ) {
         TokenResponse response = magicLinkService.validate(token);
-       return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok(response);
     }
 
 }

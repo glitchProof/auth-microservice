@@ -5,8 +5,12 @@ import org.glitchproof.auth.features.auth.dto.oauth.GoogleUserDto;
 import org.glitchproof.auth.features.user.dto.CreateUserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface AuthMapper {
 
     @Mapping(target = "googleSubId", source = "subId")

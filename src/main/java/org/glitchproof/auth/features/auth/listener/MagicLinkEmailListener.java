@@ -1,6 +1,7 @@
 package org.glitchproof.auth.features.auth.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.TimeUnit;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
+import org.glitchproof.auth.features.auth.enums.MagicLinkStatus;
 
 @Slf4j
 @Component
@@ -20,6 +23,7 @@ import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
 public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEvent> {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final StringRedisTemplate redisTemplate;
 
     @Value("${app.mail.from-address}")
     private String from;
@@ -51,7 +55,18 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
 
         } catch (MessagingException e) {
             log.error("Error when sending message: {}", e.getMessage());
+        } catch (Exception e){
+            log.error("Email sending exception: {}", e.getMessage());
         }
+
+        redisTemplate
+                .opsForValue()
+                .set(
+                        email,
+                        MagicLinkStatus.UNUSED.name(),
+                        15,
+                        TimeUnit.MINUTES
+                );
 
         log.info("Email send to {} with magicLink {}",  event.getEmail(), event.getMagicLink());
     }

@@ -1,21 +1,19 @@
 package org.glitchproof.auth.features.user.mapper;
 
 
-import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.glitchproof.auth.features.user.entity.User;
+import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.glitchproof.auth.features.user.dto.CreateUserDto;
 import org.glitchproof.auth.features.user.dto.UserResponse;
-import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface UserMapper {
-    @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "lastLogin", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
     User createUserRequestToUserEntity(CreateUserDto createUserDto);
 
     UserResponse userEntityToUserResponse(User user);

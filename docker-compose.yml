@@ -1,6 +1,6 @@
 services:
-  auth-db:
-    container_name: auth_db
+  db:
+    container_name: ms
     image: postgres:17-alpine
 
     environment:
@@ -8,5 +8,23 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
 
+    volumes:
+      - auth-ms:/var/lib/postgres/data
     ports:
       - '5432:5432'
+
+  redis:
+    container_name: redis
+    image: redis
+
+    ports:
+      - '6379:6379'
+
+    volumes:
+      - auth-ms:/var/lib/redis/data
+
+volumes:
+  auth-ms:
+
+networks:
+  auth-ms:
