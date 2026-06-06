@@ -42,7 +42,7 @@ public class PasswordAuthServiceImpl
             throw new DomainException(AuthException.CREDENTIALS_NOT_VALID);
         }
 
-        log.info("Login for {}", loginRequest.email());
+        log.info("user sign in: {}", loginRequest.email());
 
         userService.updateLastLogin(loginRequest.email());
 
@@ -72,7 +72,7 @@ public class PasswordAuthServiceImpl
 
         userService.createUser(newUser);
 
-        log.info("New User {} has been created", newUser);
+        log.info("new user {} registered", newUser);
 
         return jwtService.generatePairToken(registerRequest.getEmail());
     }

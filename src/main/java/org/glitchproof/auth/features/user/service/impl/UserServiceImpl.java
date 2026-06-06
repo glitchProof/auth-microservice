@@ -48,6 +48,8 @@ public class UserServiceImpl
 
         userRepository.save(user);
 
+        log.info("User created: {}", user);
+
         return userMapper.userEntityToUserResponse(user);
     }
 
@@ -55,11 +57,13 @@ public class UserServiceImpl
     public UserResponse updateUser(String email, UpsertUserDto upsertUser) {
         var user = userRepository
                 .findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND) );
 
         userMapper.upsertUser(upsertUser, user);
 
         userRepository.save(user);
+
+        log.info("User updated: {}", user);
 
         return userMapper.userEntityToUserResponse(user);
     }
@@ -68,7 +72,7 @@ public class UserServiceImpl
     @Override
     public void updateLastLogin(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found email: " + email));
+                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
 
         user.setLastLogin(LocalDateTime.now());
 

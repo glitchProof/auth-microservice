@@ -64,7 +64,7 @@ public class MagicLinkServiceImpl
                 )
         );
 
-        log.info("Magic link send to email: {}", email);
+        log.info("magic link created for  user {} and event dispatched", email);
     }
 
     @Override

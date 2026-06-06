@@ -69,6 +69,6 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
         }
 
 
-        log.info("Email send to {} with magicLink {}",  event.getEmail(), event.getMagicLink());
+        log.info("email sent to {} with magicLink {}",  event.getEmail(), event.getMagicLink());
     }
 }

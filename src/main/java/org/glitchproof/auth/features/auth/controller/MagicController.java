@@ -3,6 +3,7 @@ package org.glitchproof.auth.features.auth.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
+import org.glitchproof.auth.core.annotations.RateLimiter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.glitchproof.auth.features.token.dto.TokenResponse;
@@ -15,6 +16,7 @@ import org.glitchproof.auth.features.auth.dto.magic_link.MagicLinkRequest;
 public class MagicController {
     private final MagicLinkService magicLinkService;
 
+    @RateLimiter(capacity = 2, durationInSeconds = 120)
     @PostMapping("/login/magic-link/send")
     @Operation(
             tags= "Authentication",
@@ -28,7 +30,7 @@ public class MagicController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @RateLimiter(capacity = 2, durationInSeconds = 120)
     @PostMapping("/login/magic-link/verify")
     @Operation(
             tags= "Authentication",

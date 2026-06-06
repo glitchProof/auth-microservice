@@ -72,15 +72,14 @@ public class JwtFilter
 
             filterChain.doFilter(request, response);
 
-        }
-        catch(io.jsonwebtoken.JwtException e){
+        } catch(io.jsonwebtoken.JwtException e){
             JwtException error = switch(e){
                 case ExpiredJwtException _e -> JwtException.EXPIRED;
                 case MalformedJwtException _e -> JwtException.MALFORMED;
                 default -> JwtException.INVALID;
             };
 
-            log.error(e.getMessage());
+            log.error("error in jwt token {}", e.getMessage());
 
             handlerExceptionResolver
                     .resolveException(
@@ -91,14 +90,11 @@ public class JwtFilter
                     );
 
             return;
-        }
-
-        catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("shit something went wrong {}", e.getMessage());
 
             handlerExceptionResolver
                     .resolveException(request, response, null, new DomainException(JwtException.INVALID));
-            return;
         }
     }
 }

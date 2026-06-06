@@ -43,11 +43,9 @@ public class GoogleTokenVerificationServiceImpl
                   jwt.getClaimAsString("name"),
                   jwt.getClaimAsString("picture")
           );
-      }
-      catch (DomainException e){
+      } catch (DomainException e){
           throw e;
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
           log.error("Google token verification failed", e);
 
           throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
