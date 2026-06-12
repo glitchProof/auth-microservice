@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@Profile("!prod")
+//@Profile("!prod")
 public class OpenAPIConfig {
     @Bean
     public OpenAPI openAPI() {

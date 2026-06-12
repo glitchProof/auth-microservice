@@ -12,8 +12,10 @@ services:
       REDIS_HOST: auth-ms-redis
 
     depends_on:
-      - auth-ms-redis
-      - auth-ms-db
+      auth-ms-redis:
+        condition: service_healthy
+      auth-ms-db:
+        condition: service_healthy
 
   auth-ms-db:
     container_name: auth-db
@@ -25,9 +27,14 @@ services:
       POSTGRES_DB: ${DB_NAME}
 
     volumes:
-      - auth-ms-db:/var/lib/postgres/data
+      - auth-ms-db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   auth-ms-redis:
     container_name: auth-redis
@@ -38,6 +45,12 @@ services:
 
     volumes:
       - auth-ms-redis:/data
+
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   auth-ms-db:
