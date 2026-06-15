@@ -28,9 +28,10 @@ public class User {
     )
     String fullName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     String username;
 
+    @ToString.Exclude
     @Column(name="password_hash")
     String passwordHash;
 

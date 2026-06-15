@@ -1,20 +1,20 @@
 package org.glitchproof.auth.features.user.service.impl;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.glitchproof.auth.features.user.dto.UpsertUserDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.glitchproof.auth.features.user.entity.User;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.glitchproof.auth.features.user.dto.UserResponse;
+import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.glitchproof.auth.features.user.mapper.UserMapper;
-import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.features.user.dto.CreateUserDto;
+import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.features.user.exception.UserException;
 import org.glitchproof.auth.features.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
 
@@ -44,7 +44,10 @@ public class UserServiceImpl
         User user = userMapper.createUserRequestToUserEntity(createUserDto);
 
         user.setLastLogin(LocalDateTime.now());
-        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
+
+        if (StringUtils.hasText(createUserDto.getPassword())) {
+            user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
+        }
 
         userRepository.save(user);
 
@@ -57,7 +60,7 @@ public class UserServiceImpl
     public UserResponse updateUser(String email, UpsertUserDto upsertUser) {
         var user = userRepository
                 .findByEmail(email)
-                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND) );
+                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
 
         userMapper.upsertUser(upsertUser, user);
 

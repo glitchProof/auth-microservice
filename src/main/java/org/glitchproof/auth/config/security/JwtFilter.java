@@ -91,7 +91,7 @@ public class JwtFilter
 
             return;
         } catch (Exception e) {
-            log.error("shit something went wrong {}", e.getMessage());
+            log.error("Something went wrong {}", e.getMessage());
 
             handlerExceptionResolver
                     .resolveException(request, response, null, new DomainException(JwtException.INVALID));

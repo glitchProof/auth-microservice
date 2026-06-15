@@ -2,63 +2,61 @@ package org.glitchproof.auth.core.annotations.aop;
 
 import java.util.Map;
 import java.time.Duration;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.github.bucket4j.Bucket;
+import lombok.RequiredArgsConstructor;
 import io.github.bucket4j.Bandwidth;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.http.HttpStatus;
 import org.aspectj.lang.ProceedingJoinPoint;
+import io.github.bucket4j.BucketConfiguration;
+import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.glitchproof.auth.core.annotations.RateLimiter;
-import org.springframework.web.server.ResponseStatusException;
+import org.glitchproof.auth.core.exception.DomainException;
 import org.springframework.web.context.request.RequestContextHolder;
+import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.glitchproof.auth.core.annotations.exceptions.RateLimiterException;
+
 
 
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class RateLimitingAspect {
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final LettuceBasedProxyManager<String> lettuceBasedProxyManager;
+    private final Map<RateLimiter, BucketConfiguration> bucketConfigCache = new ConcurrentHashMap<>();
 
-    private Bucket createNewBucket(RateLimiter limit) {
-        final var capacity = limit.capacity();
-        final var durationInSeconds = Duration.ofSeconds(limit.durationInSeconds());
+    private BucketConfiguration buildConfig(RateLimiter limit) {
+        final int capacity = limit.capacity();
 
         Bandwidth bandwidth = Bandwidth.builder()
                 .capacity(capacity)
-                .refillIntervally(capacity, durationInSeconds)
+                .refillIntervally(
+                        capacity,
+                        Duration.ofSeconds(limit.durationInSeconds())
+                )
                 .build();
 
-        return Bucket
-                .builder()
+        return BucketConfiguration.builder()
                 .addLimit(bandwidth)
                 .build();
     }
 
-
     @Around("@annotation(rateLimiter)")
-    public Object enforceRateLimit(
-            ProceedingJoinPoint joinPoint,
-            RateLimiter rateLimiter
-    ) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    public Object enforceRateLimit(ProceedingJoinPoint joinPoint, RateLimiter rateLimiter) throws Throwable {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes()).getRequest();
 
-        String clientIp = request.getRemoteAddr();
-        String apiPath = request.getRequestURI();
-        String cacheKey = clientIp + ":" + apiPath;
+        String key = "rateLimiter:" + request.getRemoteAddr() + "-" + request.getRequestURI();
 
-        Bucket bucket = cache.computeIfAbsent(cacheKey, k -> createNewBucket(rateLimiter));
+        Bucket bucket = lettuceBasedProxyManager
+                .getProxy(key, () -> bucketConfigCache.computeIfAbsent(rateLimiter, this::buildConfig));
 
         if (!bucket.tryConsume(1)) {
-            throw new ResponseStatusException(
-                    HttpStatus.TOO_MANY_REQUESTS,
-                    "Too many requests - endpoint limit exceeded."
-            );
+            throw new DomainException(RateLimiterException.EXCEEDED);
         }
-
 
         return joinPoint.proceed();
     }

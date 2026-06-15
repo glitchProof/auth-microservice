@@ -1,5 +1,6 @@
 package org.glitchproof.auth.core.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.glitchproof.auth.core.dto.ApiExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -68,9 +70,10 @@ public class GlobalExceptionHandler {
         var errorResponse =  ApiExceptionResponse.builder()
                 .code(10001)
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .detail(ex.getMessage())
+                .detail("Something went wrong")
                 .build();
 
+        log.error("Something went wrong {}", ex.getMessage());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

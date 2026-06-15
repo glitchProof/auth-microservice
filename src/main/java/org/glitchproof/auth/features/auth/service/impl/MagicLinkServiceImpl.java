@@ -1,11 +1,9 @@
 package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.glitchproof.auth.features.auth.enums.MagicLinkStatus;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
 import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.springframework.beans.factory.annotation.Value;
 import org.glitchproof.auth.core.exception.DomainException;
@@ -13,9 +11,12 @@ import org.glitchproof.auth.features.token.dto.TokenResponse;
 import org.springframework.context.ApplicationEventPublisher;
 import org.glitchproof.auth.features.token.service.JwtService;
 import org.glitchproof.auth.features.user.service.UserService;
+import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.glitchproof.auth.features.auth.enums.MagicLinkStatus;
 import org.glitchproof.auth.features.auth.exception.AuthException;
-import org.glitchproof.auth.features.auth.service.MagicLinkService;
 import org.glitchproof.auth.features.user.exception.UserException;
+import org.glitchproof.auth.features.auth.service.MagicLinkService;
 import org.glitchproof.auth.features.auth.dto.magic_link.MagicLinkRequest;
 
 import java.util.concurrent.TimeUnit;
@@ -30,6 +31,8 @@ public class MagicLinkServiceImpl
     private final StringRedisTemplate redisTemplate;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final long FIFTEEN_MINUTES = TimeUnit.MINUTES.toMillis(15);
+
     @Value("${app.magic-link.url}")
     private String magicLinkBaseUrl;
 
@@ -38,44 +41,48 @@ public class MagicLinkServiceImpl
         final String email = magicLinkRequest.email();
 
         if(!userService.existsByEmail(email)){
-            throw new DomainException(AuthException.MAGIC_LINK_ONLY_SEND_REGISTERED);
+            log.warn("Magic link can not be sent to {}, email not found", email);
+
+            return;
         }
 
-        final Long fifteenMinutes = 15 * 60 * 1000L;
+        final String magicToken = generateMagicToken(email);
+        final String magicKey = magicLinkKey(email, magicToken);
+        final String magicLink = generateMagicLink(magicToken);
 
-        final String magicToken = jwtService.generateToken(
-                email,
-                null,
-                fifteenMinutes,
-                TokenType.MAGIC
-        );
-
-        String link = String.format(
-                "%s?token=%s",
-                magicLinkBaseUrl,
-                magicToken
-        );
+        redisTemplate
+                .opsForValue()
+                .set(
+                        magicKey,
+                        MagicLinkStatus.UNUSED.name(),
+                        15,
+                        TimeUnit.MINUTES
+                );
 
         applicationEventPublisher.publishEvent(
-                new MagicLinkEvent(
-                        this,
-                        email,
-                        link
-                )
+                new MagicLinkEvent(this, email, magicLink)
         );
 
-        log.info("magic link created for  user {} and event dispatched", email);
+        log.info("magic link created for user {} and event dispatched", email);
     }
 
     @Override
     public TokenResponse validate(String token) {
-        if(!jwtService.validate(token, TokenType.MAGIC)){
+        try {
+            jwtService.validate(token, TokenType.MAGIC);
+        } catch (JwtException | DomainException e){
             throw new DomainException(AuthException.MAGIC_LINK_INVALID);
         }
 
-        final String email = jwtService.getSubjectFromToken(token);
+        String email = jwtService.getSubjectFromToken(token);
 
-        final String status = redisTemplate.opsForValue().get(email);
+        String magicLinkKey = magicLinkKey(email, token);
+
+        String status = redisTemplate.opsForValue().get(magicLinkKey);
+
+        if(status == null){
+            throw new DomainException(AuthException.MAGIC_LINK_INVALID);
+        }
 
         final MagicLinkStatus magicLinkStatus = MagicLinkStatus.valueOf(status);
 
@@ -90,7 +97,7 @@ public class MagicLinkServiceImpl
         userService.updateLastLogin(email);
 
         redisTemplate.opsForValue().set(
-                email,
+                magicLinkKey,
                 MagicLinkStatus.USED.name(),
                 5,
                 TimeUnit.MINUTES
@@ -99,5 +106,21 @@ public class MagicLinkServiceImpl
         log.info("Magic link validated: {}", email);
 
         return jwtService.generatePairToken(email);
+    }
+
+    private String magicLinkKey(String email, String token) {
+        return String.format("magic-link:%s-%s", email, token);
+    }
+
+    private String generateMagicToken(String email) {
+        return jwtService.generateToken(email, null, FIFTEEN_MINUTES, TokenType.MAGIC);
+    }
+
+    private String generateMagicLink(String magicToken) {
+        return String.format(
+                "%s?token=%s",
+                magicLinkBaseUrl,
+                magicToken
+        );
     }
 }

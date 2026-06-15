@@ -12,7 +12,6 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface AuthMapper {
-
     @Mapping(target = "googleSubId", source = "subId")
     @Mapping(target = "username", source = "fullName")
     CreateUserDto toCreateUserRequest(GoogleUserDto googleUserDto);

@@ -1,8 +1,7 @@
 services:
-  auth-ms:
-    container_name: ms
+  ms:
     build: .
-
+    container_name: auth-ms
     ports:
       - '8080:8080'
     env_file:

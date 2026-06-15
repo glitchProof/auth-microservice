@@ -1,6 +1,6 @@
 
 app:
-  magic_link:
+  magic-link:
     url: ${MAGIC_LINK_BASE_URL}
 
   mail:

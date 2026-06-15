@@ -1,8 +1,8 @@
 package org.glitchproof.auth.core.exception;
 
-import org.glitchproof.auth.core.model.DomainExceptionHolder;
-import org.glitchproof.auth.core.model.ExceptionDefinition;
 import org.springframework.http.HttpStatus;
+import org.glitchproof.auth.core.model.ExceptionDefinition;
+import org.glitchproof.auth.core.model.DomainExceptionHolder;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class DomainException extends RuntimeException {
     }
 
     public Integer getCode() {
-        return domainExceptionModel.code();
+        return domainExceptionModel.code().getValue();
     }
 
     public Map<String, String> getViolations() {

@@ -32,7 +32,9 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'com.bucket4j:bucket4j-core:8.7.0'
+    implementation 'com.bucket4j:bucket4j_jdk17-core:8.19.0'
+    implementation 'com.bucket4j:bucket4j_jdk17-redis-common:8.19.0'
+    implementation 'com.bucket4j:bucket4j_jdk17-lettuce:8.19.0'
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'

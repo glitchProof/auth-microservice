@@ -21,6 +21,7 @@ public class CreateUserDto {
     String username;
 
     @NotBlank
+    @ToString.Exclude
     String password;
 
     @NotBlank

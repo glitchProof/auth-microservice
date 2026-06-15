@@ -1,18 +1,19 @@
 package org.glitchproof.auth.core.model;
 
 import org.springframework.http.HttpStatus;
+import org.glitchproof.auth.core.enums.DomainErrorCodes;
 
 import java.util.Map;
 
 public record DomainExceptionHolder(
         HttpStatus status,
-        Integer code,
+        DomainErrorCodes code,
         String detail,
         Map<String, String > violations
 ) {
     public DomainExceptionHolder(
             HttpStatus status,
-            Integer code,
+            DomainErrorCodes code,
             String detail
     ){
         this(status, code, detail, null);
@@ -20,7 +21,7 @@ public record DomainExceptionHolder(
 
     public DomainExceptionHolder(
             HttpStatus status,
-            Integer code,
+            DomainErrorCodes code,
             Map<String, String> violations
     ){
         this(status, code, null, violations);
@@ -29,7 +30,7 @@ public record DomainExceptionHolder(
 
     public static DomainExceptionHolder of (
             HttpStatus status,
-            Integer code,
+            DomainErrorCodes code,
             String detail
     ){
         return new DomainExceptionHolder(status, code, detail);
@@ -37,7 +38,7 @@ public record DomainExceptionHolder(
 
     public static DomainExceptionHolder of (
             HttpStatus status,
-            Integer code,
+            DomainErrorCodes code,
             Map<String, String> violations
     ){
         return new DomainExceptionHolder(status, code, violations);
@@ -46,7 +47,7 @@ public record DomainExceptionHolder(
 
     public static DomainExceptionHolder of (
             HttpStatus status,
-            Integer code,
+            DomainErrorCodes code,
             String detail,
             Map<String, String> violations
     ){

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.glitchproof.auth.features.auth.mapper.AuthMapper;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
 import org.springframework.stereotype.Service;
-import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.glitchproof.auth.features.auth.dto.RegisterRequest;
 import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.core.exception.DomainException;

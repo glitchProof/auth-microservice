@@ -1,7 +1,6 @@
 package org.glitchproof.auth.features.auth.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import java.util.concurrent.TimeUnit;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import lombok.RequiredArgsConstructor;
@@ -13,17 +12,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
-import org.glitchproof.auth.features.auth.enums.MagicLinkStatus;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEvent> {
+public class MagicLinkEmailListener
+        implements ApplicationListener<MagicLinkEvent> {
+
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
-    private final StringRedisTemplate redisTemplate;
 
     @Value("${app.mail.from-address}")
     private String from;
@@ -32,10 +30,11 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
     @Override
     public void onApplicationEvent(MagicLinkEvent event) {
         Context context = new Context();
+
         final String email = event.getEmail();
         final String magicLink = event.getMagicLink();
 
-        context.setVariable("email", event.getEmail());
+        context.setVariable("email", email);
         context.setVariable("magicLink", magicLink);
 
         final String emailContent = templateEngine.process("magic-link", context);
@@ -47,20 +46,11 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
 
             messageHelper.setTo(email);
             messageHelper.setFrom(from);
-            messageHelper.setSubject(String.format("Magic link form %s", from));
+            messageHelper.setSubject(String.format("Magic link from %s", from));
 
             messageHelper.setText(emailContent, true);
 
             mailSender.send(message);
-
-            redisTemplate
-                    .opsForValue()
-                    .set(
-                            email,
-                            MagicLinkStatus.UNUSED.name(),
-                            15,
-                            TimeUnit.MINUTES
-                    );
 
         } catch (MessagingException e) {
             log.error("Error when sending message: {}", e.getMessage());
@@ -69,6 +59,6 @@ public class MagicLinkEmailListener implements ApplicationListener<MagicLinkEven
         }
 
 
-        log.info("email sent to {} with magicLink {}",  event.getEmail(), event.getMagicLink());
+        log.info("email sent to {} with magicLink {}", email, magicLink);
     }
 }
