@@ -36,6 +36,9 @@ dependencies {
     implementation 'com.bucket4j:bucket4j_jdk17-redis-common:8.19.0'
     implementation 'com.bucket4j:bucket4j_jdk17-lettuce:8.19.0'
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
+    implementation 'org.springframework.boot:spring-boot-flyway:4.1.0'
+    implementation 'org.flywaydb:flyway-core:12.9.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:12.9.0'
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
@@ -50,8 +53,4 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }

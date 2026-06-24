@@ -59,6 +59,6 @@ public class MagicLinkEmailListener
         }
 
 
-        log.info("email sent to {} with magicLink {}", email, magicLink);
+        log.info("magic link sent to {}", email);
     }
 }

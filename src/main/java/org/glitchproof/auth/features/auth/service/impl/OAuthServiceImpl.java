@@ -2,6 +2,7 @@ package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class OAuthServiceImpl
         implements OAuthService {
+
+    private final JwtUtils jwtUtils;
     private final JwtService jwtService;
     private final UserService userService;
     private final AuthMapper  authMapper;
@@ -48,7 +51,7 @@ public class OAuthServiceImpl
 
         log.info("user sing in with google {}", googleUserDto.email());
 
-        return jwtService.generatePairToken(updatedUser.email());
+        return jwtUtils.generatePairToken(updatedUser.email());
     }
 
     private TokenResponse register(GoogleUserDto googleUserDto) {
@@ -60,6 +63,6 @@ public class OAuthServiceImpl
 
         log.info("new user {} registered with google", newUser);
 
-        return jwtService.generatePairToken(createdUser.email());
+        return jwtUtils.generatePairToken(createdUser.email());
     }
 }

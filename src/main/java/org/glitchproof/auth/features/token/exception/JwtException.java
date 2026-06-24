@@ -12,17 +12,17 @@ public enum JwtException implements ExceptionDefinition {
     INVALID(of(
             HttpStatus.UNAUTHORIZED,
             JWT_INVALID,
-            "Jwt is invalid"
+            "Token is invalid"
     )),
     MALFORMED(of(
             HttpStatus.UNAUTHORIZED,
             JWT_MALFORMED,
-            "Jwt is malformed"
+            "Token is malformed"
     )),
     EXPIRED(of(
             HttpStatus.UNAUTHORIZED,
             JWT_EXPIRED,
-            "Jwt is expired"
+            "Token is expired"
     ));
 
     private final DomainExceptionHolder domainExceptionHolder;

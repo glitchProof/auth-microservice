@@ -13,7 +13,7 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface AuthMapper {
     @Mapping(target = "googleSubId", source = "subId")
-    @Mapping(target = "username", source = "fullName")
+    @Mapping(target = "fullName", source = "fullName")
     CreateUserDto toCreateUserRequest(GoogleUserDto googleUserDto);
 
     CreateUserDto registerRequestToCreateUserRequest(RegisterRequest registerRequest);

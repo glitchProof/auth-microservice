@@ -5,16 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.ServletException;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
-import org.glitchproof.auth.features.auth.enums.TokenType;
+import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.glitchproof.auth.features.token.service.JwtService;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +28,7 @@ import java.io.IOException;
 public class JwtFilter
     extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
@@ -50,7 +47,7 @@ public class JwtFilter
             }
 
             final String token = authorization.substring(7);
-            final String email = jwtService.getSubjectFromToken(token);
+            final String email = jwtUtils.validateAndGetSubjectFromAccessToken(token);
 
             SecurityContext securityContext = SecurityContextHolder.getContext();
             Authentication authentication = securityContext.getAuthentication();
@@ -58,36 +55,20 @@ public class JwtFilter
             if(email != null && authentication == null){
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                if(jwtService.validate(token, TokenType.ACCESS)) {
-                    var authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-                    securityContext.setAuthentication(authToken);
-                }
-
+                securityContext.setAuthentication(authToken);
             }
 
             filterChain.doFilter(request, response);
 
-        } catch(io.jsonwebtoken.JwtException e){
-            JwtException error = switch(e){
-                case ExpiredJwtException _e -> JwtException.EXPIRED;
-                case MalformedJwtException _e -> JwtException.MALFORMED;
-                default -> JwtException.INVALID;
-            };
-
-            log.error("error in jwt token {}", e.getMessage());
-
+        } catch(DomainException e){
             handlerExceptionResolver
-                    .resolveException(
-                            request,
-                            response,
-                            null,
-                            new DomainException(error)
-                    );
+                    .resolveException(request, response, null, e);
 
             return;
         } catch (Exception e) {

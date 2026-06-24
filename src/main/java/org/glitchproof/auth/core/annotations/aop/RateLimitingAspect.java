@@ -13,13 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.glitchproof.auth.core.annotations.RateLimiter;
+import org.glitchproof.auth.config.security.UniqueIdFilter;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.springframework.web.context.request.RequestContextHolder;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.glitchproof.auth.core.annotations.exceptions.RateLimiterException;
-
-
 
 @Aspect
 @Component
@@ -27,6 +26,8 @@ import org.glitchproof.auth.core.annotations.exceptions.RateLimiterException;
 public class RateLimitingAspect {
     private final LettuceBasedProxyManager<String> lettuceBasedProxyManager;
     private final Map<RateLimiter, BucketConfiguration> bucketConfigCache = new ConcurrentHashMap<>();
+
+    public static final String RATE_LIMITER_PREFIX = "rateLimiter";
 
     private BucketConfiguration buildConfig(RateLimiter limit) {
         final int capacity = limit.capacity();
@@ -49,7 +50,13 @@ public class RateLimitingAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .currentRequestAttributes()).getRequest();
 
-        String key = "rateLimiter:" + request.getRemoteAddr() + "-" + request.getRequestURI();
+        final String identifier = String.format(
+                "%s-%s",
+                getUniqueId(request),
+                request.getRequestURI()
+        );
+
+        final String key = generateRedisKey(identifier);
 
         Bucket bucket = lettuceBasedProxyManager
                 .getProxy(key, () -> bucketConfigCache.computeIfAbsent(rateLimiter, this::buildConfig));
@@ -59,5 +66,13 @@ public class RateLimitingAspect {
         }
 
         return joinPoint.proceed();
+    }
+
+    private String generateRedisKey(String uniqueKey){
+        return String.format("%s:%s", RATE_LIMITER_PREFIX, uniqueKey);
+    }
+
+    private String getUniqueId(HttpServletRequest request) {
+        return request.getAttribute(UniqueIdFilter.UNIQUE_ID_HEADER).toString();
     }
 }

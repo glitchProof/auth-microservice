@@ -1,14 +1,16 @@
 package org.glitchproof.auth.features.user.entity;
 
 import lombok.*;
+import java.util.UUID;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.experimental.FieldDefaults;
+import org.glitchproof.auth.features.preferences.entity.Preferences;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.CreationTimestamp;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name= "users")
@@ -20,7 +22,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @UuidGenerator
-    String id;
+    UUID id;
 
     @Column(
             name = "full_name",
@@ -42,7 +44,14 @@ public class User {
     String googleSubId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
     AuthProvider provider;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "preferences_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Preferences preferences;
 
     @Column(
             name = "last_login",
@@ -64,4 +73,11 @@ public class User {
     )
     @CreationTimestamp
     LocalDateTime createdAt;
+
+    @PrePersist
+    void initPreferences(){
+        if(preferences == null){
+            preferences = new Preferences();
+        }
+    }
 }

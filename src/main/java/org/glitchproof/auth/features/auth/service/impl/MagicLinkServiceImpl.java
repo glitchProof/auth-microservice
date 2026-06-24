@@ -1,8 +1,10 @@
 package org.glitchproof.auth.features.auth.service.impl;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.auth.enums.TokenType;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MagicLinkServiceImpl
         implements MagicLinkService {
+    private final JwtUtils jwtUtils;
     private final JwtService jwtService;
     private final UserService userService;
     private final StringRedisTemplate redisTemplate;
@@ -67,14 +70,9 @@ public class MagicLinkServiceImpl
     }
 
     @Override
+    @SneakyThrows
     public TokenResponse validate(String token) {
-        try {
-            jwtService.validate(token, TokenType.MAGIC);
-        } catch (JwtException | DomainException e){
-            throw new DomainException(AuthException.MAGIC_LINK_INVALID);
-        }
-
-        String email = jwtService.getSubjectFromToken(token);
+        final var email = jwtUtils.validateAndGetSubjectFromAccessToken(token);
 
         String magicLinkKey = magicLinkKey(email, token);
 
@@ -105,7 +103,7 @@ public class MagicLinkServiceImpl
 
         log.info("Magic link validated: {}", email);
 
-        return jwtService.generatePairToken(email);
+        return jwtUtils.generatePairToken(email);
     }
 
     private String magicLinkKey(String email, String token) {

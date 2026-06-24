@@ -2,7 +2,9 @@ package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.glitchproof.auth.core.annotations.RateLimiter;
 import org.glitchproof.auth.features.auth.mapper.AuthMapper;
+import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.auth.dto.RegisterRequest;
@@ -23,11 +25,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 public class PasswordAuthServiceImpl
         implements PasswordAuthService {
 
-    private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
     private final AuthMapper authMapper;
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
+    @RateLimiter(capacity = 5)
     @Override
     public TokenResponse login(PasswordAuthRequest loginRequest) {
         try {
@@ -45,9 +48,10 @@ public class PasswordAuthServiceImpl
 
         userService.updateLastLogin(loginRequest.email());
 
-        return jwtService.generatePairToken(loginRequest.email());
+        return jwtUtils.generatePairToken(loginRequest.email());
     }
 
+    @RateLimiter(capacity = 5)
     @Override
     public TokenResponse register(RegisterRequest registerRequest) {
         if(userService.existsByEmail(registerRequest.getEmail())) {
@@ -73,6 +77,6 @@ public class PasswordAuthServiceImpl
 
         log.info("new user {} registered", newUser);
 
-        return jwtService.generatePairToken(registerRequest.getEmail());
+        return jwtUtils.generatePairToken(registerRequest.getEmail());
     }
 }

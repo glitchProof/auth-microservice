@@ -20,12 +20,6 @@ public class JwtService {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${app.jwt.access-token-expiration}")
-    private Long jwtAccessExpireTime;
-
-    @Value("${app.jwt.refresh-token-expiration}")
-    private Long jwtRefreshExpireTime;
-
     public String getSubjectFromToken(String token) {
         return getClaim(token, Claims::getSubject);
     }
@@ -45,28 +39,6 @@ public class JwtService {
                 .signWith(getSecretKey())
                 .compact();
 
-    }
-
-    // Access Token
-    public String generateAccessToken(String email){
-        return generateToken(email, null, jwtAccessExpireTime, TokenType.ACCESS);
-    }
-
-    public String generateAccessToken(String email, Map<String, String> claims){
-        return generateToken(email, claims, jwtAccessExpireTime, TokenType.ACCESS);
-    }
-
-    // Refresh token
-    public String generateRefreshToken(String email){
-        return generateToken(email, null, jwtRefreshExpireTime, TokenType.REFRESH);
-    }
-
-    public String generateRefreshToken(String email, Map<String, String> claims){
-        return generateToken(email, claims, jwtRefreshExpireTime, TokenType.REFRESH);
-    }
-
-    public TokenResponse generatePairToken(String email){
-        return new TokenResponse(generateAccessToken(email), generateRefreshToken(email));
     }
 
     // Validation
