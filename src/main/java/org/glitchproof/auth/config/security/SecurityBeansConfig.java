@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.glitchproof.auth.features.user.exception.UserException;
 import org.glitchproof.auth.features.user.model.CustomUserDetails;
 import org.glitchproof.auth.features.user.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,7 +29,7 @@ public class SecurityBeansConfig {
     public UserDetailsService userDetailsService() {
        return username -> userRepository.findByEmail(username)
                .map(CustomUserDetails::new)
-               .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+               .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean

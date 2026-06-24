@@ -52,13 +52,13 @@ public class MagicLinkEmailListener
 
             mailSender.send(message);
 
+            log.info("magic link sent to {}", email);
+
         } catch (MessagingException e) {
             log.error("Error when sending message: {}", e.getMessage());
+
         } catch (Exception e){
             log.error("Email sending exception: {}", e.getMessage());
         }
-
-
-        log.info("magic link sent to {}", email);
     }
 }

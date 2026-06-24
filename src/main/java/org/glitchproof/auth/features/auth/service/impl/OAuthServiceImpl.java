@@ -2,6 +2,8 @@ package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.glitchproof.auth.core.exception.DomainException;
+import org.glitchproof.auth.features.auth.exception.AuthException;
 import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.user.dto.UpsertUserDto;
@@ -24,9 +26,8 @@ public class OAuthServiceImpl
         implements OAuthService {
 
     private final JwtUtils jwtUtils;
-    private final JwtService jwtService;
+    private final AuthMapper authMapper;
     private final UserService userService;
-    private final AuthMapper  authMapper;
     private final GoogleTokenVerificationService googleTokenVerificationService;
 
     @Override

@@ -1,6 +1,7 @@
 package org.glitchproof.auth.features.preferences.services;
 
 import lombok.RequiredArgsConstructor;
+import org.glitchproof.auth.features.preferences.dto.PreferenceUpdateRequest;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.glitchproof.auth.features.user.exception.UserException;
@@ -21,5 +22,18 @@ public class PreferenceServiceImpl
                 .findByUserEmail(email)
                 .map(preferenceMapper::preferenceToPreferenceResponse)
                 .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+    }
+
+    @Override
+    public PreferenceResponse updatePreference(String email, PreferenceUpdateRequest updatedPreference) {
+        var preference = preferenceRepository.findByUserEmail(email)
+                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+
+        preferenceMapper.updatePreference(updatedPreference, preference);
+
+        var savedPreference = preferenceRepository.save(preference);
+
+        return preferenceMapper
+                .preferenceToPreferenceResponse(savedPreference);
     }
 }

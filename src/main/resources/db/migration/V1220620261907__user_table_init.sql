@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     username        VARCHAR NOT NULL,
     password_hash   VARCHAR,
     email           VARCHAR NOT NULL,
+    email_verified  BOOLEAN DEFAULT false,
     google_sub_id   VARCHAR,
     preferences_id  UUID,
     provider        VARCHAR(50) NOT NULL,

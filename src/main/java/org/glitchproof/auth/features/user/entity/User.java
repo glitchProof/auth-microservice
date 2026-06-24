@@ -40,6 +40,9 @@ public class User {
     @Column(unique = true, nullable = false)
     String email;
 
+    @Column( nullable = false)
+    Boolean emailVerified = false;
+
     @Column(unique = true)
     String googleSubId;
 
@@ -65,7 +68,6 @@ public class User {
     )
     @UpdateTimestamp
     LocalDateTime updatedAt;
-
 
     @Column(
             name= "created_at",

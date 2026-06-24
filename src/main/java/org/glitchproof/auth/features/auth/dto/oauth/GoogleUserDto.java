@@ -4,5 +4,6 @@ public record GoogleUserDto(
         String subId,
         String email,
         String fullName,
-        String picture
+        String picture,
+        Boolean emailVerified
 ) {}

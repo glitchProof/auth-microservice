@@ -23,11 +23,11 @@ public class GoogleTokenVerificationServiceImpl
 
     public GoogleTokenVerificationServiceImpl(
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
-            @Value("${app.oauth.google.client-id}") String expectedClientId
+            @Value("${app.oauth.google.jwk-set-uri}") String expectedClientId
     ) {
         this.expectedClientId = expectedClientId;
         this.jwtDecoder = NimbusJwtDecoder
-                .withIssuerLocation(issuerUri)
+                .withJwkSetUri(issuerUri)
                 .build();
     }
 
@@ -39,11 +39,18 @@ public class GoogleTokenVerificationServiceImpl
                 throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
             }
 
+            final Boolean emailVerified = jwt.getClaim("email_verified");
+
+            if(!Boolean.TRUE.equals(emailVerified)){
+                throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
+            }
+
             return new GoogleUserDto(
                     jwt.getSubject(),
                     jwt.getClaimAsString("email"),
                     jwt.getClaimAsString("name"),
-                    jwt.getClaimAsString("picture")
+                    jwt.getClaimAsString("picture"),
+                    jwt.getClaimAsBoolean("email_verified")
             );
         } catch (DomainException e) {
             throw e;

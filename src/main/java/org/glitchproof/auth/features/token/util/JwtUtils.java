@@ -5,6 +5,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.glitchproof.auth.features.token.dto.TokenResponse;
@@ -27,6 +28,8 @@ public class JwtUtils {
 
     @Value("${app.jwt.refresh-token-expiration}")
     private Long jwtRefreshExpireTime;
+
+    private final Long FIFTEEN_MINUTES = TimeUnit.MINUTES.toMillis(15);
 
     private final Supplier<Exception> defaultExceptionSupplier =
             () -> new DomainException(JwtException.INVALID);
@@ -138,6 +141,14 @@ public class JwtUtils {
         validateOrThrow(token, TokenType.MAGIC, defaultExceptionSupplier);
 
         return jwtService.getSubjectFromToken(token);
+    }
+
+    public String generateMagicToken(String email){
+        return jwtService.generateToken(email, null, FIFTEEN_MINUTES, TokenType.MAGIC);
+    }
+
+    public String generateMagicToken(String email, Map<String, String> claims){
+        return jwtService.generateToken(email, claims, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
     // Access token validators

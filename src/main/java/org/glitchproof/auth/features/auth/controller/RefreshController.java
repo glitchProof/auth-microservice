@@ -1,5 +1,6 @@
 package org.glitchproof.auth.features.auth.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.glitchproof.auth.core.annotations.RateLimiter;
@@ -20,6 +21,10 @@ public class RefreshController {
 
     @PostMapping("/refresh")
     @RateLimiter(capacity = 2)
+    @Operation(
+            tags = "Authentication",
+            summary = "generate new access token form refresh token "
+    )
     public ResponseEntity<AccessToken> refresh(
             @Valid @RequestBody TokenRequest tokenRequest
     ) {

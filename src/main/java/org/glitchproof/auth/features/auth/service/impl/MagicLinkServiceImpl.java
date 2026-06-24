@@ -29,12 +29,9 @@ import java.util.concurrent.TimeUnit;
 public class MagicLinkServiceImpl
         implements MagicLinkService {
     private final JwtUtils jwtUtils;
-    private final JwtService jwtService;
     private final UserService userService;
     private final StringRedisTemplate redisTemplate;
     private final ApplicationEventPublisher applicationEventPublisher;
-
-    private final long FIFTEEN_MINUTES = TimeUnit.MINUTES.toMillis(15);
 
     @Value("${app.magic-link.url}")
     private String magicLinkBaseUrl;
@@ -49,7 +46,7 @@ public class MagicLinkServiceImpl
             return;
         }
 
-        final String magicToken = generateMagicToken(email);
+        final String magicToken = jwtUtils.generateMagicToken(email);
         final String magicKey = magicLinkKey(email, magicToken);
         final String magicLink = generateMagicLink(magicToken);
 
@@ -72,11 +69,13 @@ public class MagicLinkServiceImpl
     @Override
     @SneakyThrows
     public TokenResponse validate(String token) {
-        final var email = jwtUtils.validateAndGetSubjectFromAccessToken(token);
+        final var email = jwtUtils.validateAndGetSubjectFromMagicToken(token);
 
         String magicLinkKey = magicLinkKey(email, token);
 
-        String status = redisTemplate.opsForValue().get(magicLinkKey);
+        final var status = redisTemplate
+                .opsForValue()
+                .getAndDelete(magicLinkKey);
 
         if(status == null){
             throw new DomainException(AuthException.MAGIC_LINK_INVALID);
@@ -94,12 +93,14 @@ public class MagicLinkServiceImpl
 
         userService.updateLastLogin(email);
 
-        redisTemplate.opsForValue().set(
-                magicLinkKey,
-                MagicLinkStatus.USED.name(),
-                5,
-                TimeUnit.MINUTES
-        );
+        redisTemplate
+                .opsForValue()
+                .setIfPresent(
+                        magicLinkKey,
+                        MagicLinkStatus.USED.name(),
+                        5,
+                        TimeUnit.MINUTES
+                );
 
         log.info("Magic link validated: {}", email);
 
@@ -108,10 +109,6 @@ public class MagicLinkServiceImpl
 
     private String magicLinkKey(String email, String token) {
         return String.format("magic-link:%s-%s", email, token);
-    }
-
-    private String generateMagicToken(String email) {
-        return jwtService.generateToken(email, null, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
     private String generateMagicLink(String magicToken) {

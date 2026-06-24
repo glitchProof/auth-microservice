@@ -31,4 +31,7 @@ public class CreateUserDto {
     String googleSubId;
 
     AuthProvider provider;
+
+    @Builder.Default
+    Boolean emailVerified = false;
 }

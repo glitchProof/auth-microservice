@@ -71,9 +71,10 @@ public class GlobalExceptionHandler {
                 .code(10001)
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .detail("Something went wrong")
+                .timestamp(LocalDateTime.now())
                 .build();
 
-        log.error("Something went wrong {}", ex.getMessage());
+        log.error("Something went wrong", ex);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

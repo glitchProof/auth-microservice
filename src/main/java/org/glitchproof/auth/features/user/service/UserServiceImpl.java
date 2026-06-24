@@ -1,11 +1,13 @@
 package org.glitchproof.auth.features.user.service;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.user.entity.User;
 import org.glitchproof.auth.core.exception.DomainException;
+import org.springframework.validation.annotation.Validated;
 import org.glitchproof.auth.features.user.dto.UserResponse;
 import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.glitchproof.auth.features.user.mapper.UserMapper;
@@ -13,7 +15,6 @@ import org.glitchproof.auth.features.user.dto.CreateUserDto;
 import org.glitchproof.auth.features.user.exception.UserException;
 import org.glitchproof.auth.features.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 
@@ -35,7 +36,7 @@ public class UserServiceImpl
     }
 
     @Override
-    public UserResponse createUser(@Validated CreateUserDto createUserDto) {
+    public UserResponse createUser(@Valid CreateUserDto createUserDto) {
         if(userRepository.existsByUsernameOrEmail(createUserDto.getUsername(), createUserDto.getEmail())){
             throw new DomainException(UserException.USERNAME_AND_EMAIL_EXISTS);
         }

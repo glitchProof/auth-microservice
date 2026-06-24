@@ -3,6 +3,7 @@ package org.glitchproof.auth.core.annotations.aop;
 import java.util.Map;
 import java.time.Duration;
 import io.github.bucket4j.Bucket;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import io.github.bucket4j.Bandwidth;
 import org.aspectj.lang.annotation.Around;
@@ -72,7 +73,14 @@ public class RateLimitingAspect {
         return String.format("%s:%s", RATE_LIMITER_PREFIX, uniqueKey);
     }
 
+    @Nullable
     private String getUniqueId(HttpServletRequest request) {
-        return request.getAttribute(UniqueIdFilter.UNIQUE_ID_HEADER).toString();
+        var uniqueId = request.getAttribute(UniqueIdFilter.UNIQUE_ID_HEADER);
+
+        if(uniqueId == null){
+            return null;
+        }
+
+        return uniqueId.toString();
     }
 }

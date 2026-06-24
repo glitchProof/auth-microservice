@@ -1,6 +1,7 @@
 package org.glitchproof.auth.config.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
+
+    // Prevent JwtFilter from being auto-registered as a servlet filter,
+    // since it is already added to the Spring Security filter chain below.
+    @Bean
+    public FilterRegistrationBean<JwtFilter> jwtFilterRegistration(JwtFilter jwtFilter) {
+        var registration = new FilterRegistrationBean<>(jwtFilter);
+
+        registration.setEnabled(false);
+
+        return registration;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {

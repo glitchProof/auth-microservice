@@ -5,8 +5,11 @@ import org.glitchproof.auth.features.preferences.enums.Languages;
 import org.glitchproof.auth.features.preferences.enums.ThemeMode;
 
 @Builder
-public record PreferenceResponse(
-        Languages   language,
+public record PreferenceUpdateRequest(
         ThemeMode   theme,
-        String      timezone
+        Languages   language,
+        String      timezone,
+        Boolean     notificationEnabled,
+        Boolean     emailNotificationEnabled,
+        Boolean     pushNotificationEnabled
 ) {}

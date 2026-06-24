@@ -11,13 +11,15 @@ import org.springframework.context.annotation.Configuration;
 public class OpenAPIConfig {
     @Bean
     public OpenAPI openAPI() {
-        Info info = new Info()
+        return new OpenAPI()
+                .info(getInfo());
+    }
+
+    private Info getInfo(){
+        return new Info()
                 .title("Auth")
                 .version("0.0.1")
                 .description("Auth api for glitchProof");
-
-
-        return new OpenAPI()
-                .info(info);
     }
+
 }

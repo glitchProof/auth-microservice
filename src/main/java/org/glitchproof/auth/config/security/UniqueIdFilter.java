@@ -1,5 +1,6 @@
 package org.glitchproof.auth.config.security;
 
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
@@ -31,7 +32,14 @@ public class UniqueIdFilter
        filterChain.doFilter(request, response);
     }
 
+    @Nullable
     private String getRequestIp(HttpServletRequest request) {
+        final var address = request.getRemoteAddr();
+
+        if(StringUtils.hasText(address)) {
+            return address.trim();
+        }
+
         final var xForwardFor = request.getHeader("X-Forwarded-For");
 
         if (StringUtils.hasText(xForwardFor)) {
@@ -40,12 +48,12 @@ public class UniqueIdFilter
             return ips[0].trim();
         }
 
-        final var realIp = request.getHeader("Real-IP");
+        final var realIp = request.getHeader("X-Real-IP");
 
         if (StringUtils.hasText(realIp)) {
             return realIp;
         }
 
-        return request.getRemoteAddr();
+        return null;
     }
 }
