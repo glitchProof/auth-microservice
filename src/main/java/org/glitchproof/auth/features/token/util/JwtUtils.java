@@ -5,6 +5,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,7 @@ public class JwtUtils {
         }
     }
 
-    public String validateAndGetSubject(
+    public UUID validateAndGetSubject(
             String token,
             TokenType type,
             Supplier<Exception> throwCallback
@@ -80,12 +81,12 @@ public class JwtUtils {
         validateOrThrow(token, TokenType.REFRESH, defaultExceptionSupplier);
     }
 
-    public String generateRefreshToken(String email){
-        return jwtService.generateToken(email, null, jwtRefreshExpireTime, TokenType.REFRESH);
+    public String generateRefreshToken(UUID userId){
+        return jwtService.generateToken(userId, null, jwtRefreshExpireTime, TokenType.REFRESH);
     }
 
-    public String generateRefreshToken(String email, Map<String, String> claims){
-        return jwtService.generateToken(email, claims, jwtRefreshExpireTime, TokenType.REFRESH);
+    public String generateRefreshToken(UUID userId, Map<String, String> claims){
+        return jwtService.generateToken(userId, claims, jwtRefreshExpireTime, TokenType.REFRESH);
     }
 
     public void validateRefreshToken(
@@ -95,7 +96,7 @@ public class JwtUtils {
         validateOrThrow(token, TokenType.REFRESH, throwCallback);
     }
 
-    public String validateAndGetSubjectFromRefreshToken(
+    public UUID validateAndGetSubjectFromRefreshToken(
             String token,
             Supplier<Exception> throwCallback
     ) throws Exception {
@@ -104,7 +105,7 @@ public class JwtUtils {
         return jwtService.getSubjectFromToken(token);
     }
 
-    public String validateAndGetSubjectFromRefreshToken(
+    public UUID validateAndGetSubjectFromRefreshToken(
             String token
     ) throws Exception {
         validateOrThrow(token, TokenType.REFRESH, defaultExceptionSupplier);
@@ -126,7 +127,7 @@ public class JwtUtils {
         validateOrThrow(token, TokenType.MAGIC, throwCallback);
     }
 
-    public String validateAndGetSubjectFromMagicToken(
+    public UUID validateAndGetSubjectFromMagicToken(
             String token,
             Supplier<Exception> throwCallback
     ) throws Exception {
@@ -135,7 +136,7 @@ public class JwtUtils {
         return jwtService.getSubjectFromToken(token);
     }
 
-    public String validateAndGetSubjectFromMagicToken(
+    public UUID validateAndGetSubjectFromMagicToken(
             String token
     ) throws Exception {
         validateOrThrow(token, TokenType.MAGIC, defaultExceptionSupplier);
@@ -143,21 +144,21 @@ public class JwtUtils {
         return jwtService.getSubjectFromToken(token);
     }
 
-    public String generateMagicToken(String email){
-        return jwtService.generateToken(email, null, FIFTEEN_MINUTES, TokenType.MAGIC);
+    public String generateMagicToken(UUID userID){
+        return jwtService.generateToken(userID, null, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
-    public String generateMagicToken(String email, Map<String, String> claims){
-        return jwtService.generateToken(email, claims, FIFTEEN_MINUTES, TokenType.MAGIC);
+    public String generateMagicToken(UUID userID, Map<String, String> claims){
+        return jwtService.generateToken(userID, claims, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
     // Access token validators
-    public String generateAccessToken(String email){
-        return jwtService.generateToken(email, null, jwtAccessExpireTime, TokenType.ACCESS);
+    public String generateAccessToken(UUID userID){
+        return jwtService.generateToken(userID, null, jwtAccessExpireTime, TokenType.ACCESS);
     }
 
-    public String generateAccessToken(String email, Map<String, String> claims){
-        return jwtService.generateToken(email, claims, jwtAccessExpireTime, TokenType.ACCESS);
+    public String generateAccessToken(UUID userID, Map<String, String> claims){
+        return jwtService.generateToken(userID, claims, jwtAccessExpireTime, TokenType.ACCESS);
     }
 
     public void validateAccessToken(
@@ -173,7 +174,7 @@ public class JwtUtils {
         validateOrThrow(token, TokenType.ACCESS, throwCallback);
     }
 
-    public String validateAndGetSubjectFromAccessToken(
+    public UUID validateAndGetSubjectFromAccessToken(
             String token,
             Supplier<Exception> throwCallback
     ) throws Exception {
@@ -182,7 +183,7 @@ public class JwtUtils {
         return jwtService.getSubjectFromToken(token);
     }
 
-    public String validateAndGetSubjectFromAccessToken(
+    public UUID validateAndGetSubjectFromAccessToken(
             String token
     ) throws Exception {
         validateOrThrow(token, TokenType.ACCESS, defaultExceptionSupplier);
@@ -191,8 +192,8 @@ public class JwtUtils {
     }
 
     // common
-    public TokenResponse generatePairToken(String email){
-        return new TokenResponse(generateAccessToken(email), generateRefreshToken(email));
+    public TokenResponse generatePairToken(UUID userID){
+        return new TokenResponse(generateAccessToken(userID), generateRefreshToken(userID));
     }
 
 }

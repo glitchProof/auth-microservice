@@ -12,6 +12,7 @@ import org.glitchproof.auth.features.token.dto.TokenResponse;
 import java.util.Date;
 import java.util.Map;
 import javax.crypto.SecretKey;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -20,18 +21,18 @@ public class JwtService {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    public String getSubjectFromToken(String token) {
-        return getClaim(token, Claims::getSubject);
+    public UUID getSubjectFromToken(String token) {
+        return UUID.fromString(getClaim(token, Claims::getSubject));
     }
 
     public String generateToken(
-            String email,
+            UUID userID,
             Map<String, String> claims,
             Long expirationTime,
             TokenType type
     ){
         return Jwts.builder()
-                .subject(email)
+                .subject(userID.toString())
                 .claims(claims)
                 .claim("type", type)
                 .issuedAt(new Date(System.currentTimeMillis()))

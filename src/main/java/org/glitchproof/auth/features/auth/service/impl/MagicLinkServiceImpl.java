@@ -2,22 +2,18 @@ package org.glitchproof.auth.features.auth.service.impl;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.stereotype.Service;
-import org.glitchproof.auth.features.auth.enums.TokenType;
+import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.glitchproof.auth.core.exception.DomainException;
 import org.glitchproof.auth.features.token.dto.TokenResponse;
 import org.springframework.context.ApplicationEventPublisher;
-import org.glitchproof.auth.features.token.service.JwtService;
 import org.glitchproof.auth.features.user.service.UserService;
 import org.glitchproof.auth.features.auth.event.MagicLinkEvent;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.glitchproof.auth.features.auth.enums.MagicLinkStatus;
 import org.glitchproof.auth.features.auth.exception.AuthException;
-import org.glitchproof.auth.features.user.exception.UserException;
 import org.glitchproof.auth.features.auth.service.MagicLinkService;
 import org.glitchproof.auth.features.auth.dto.magic_link.MagicLinkRequest;
 
@@ -40,13 +36,19 @@ public class MagicLinkServiceImpl
     public void send(MagicLinkRequest magicLinkRequest) {
         final String email = magicLinkRequest.email();
 
-        if(!userService.existsByEmail(email)){
+        final var user = userService
+                .internal()
+                .getUserByEmail(email);
+
+        if(user == null || !user.getEmailVerified()){
             log.warn("Magic link can not be sent to {}, email not found", email);
 
             return;
         }
 
-        final String magicToken = jwtUtils.generateMagicToken(email);
+        final var userID = user.getId();
+
+        final String magicToken = jwtUtils.generateMagicToken(userID);
         final String magicKey = magicLinkKey(email, magicToken);
         final String magicLink = generateMagicLink(magicToken);
 
@@ -69,7 +71,14 @@ public class MagicLinkServiceImpl
     @Override
     @SneakyThrows
     public TokenResponse validate(String token) {
-        final var email = jwtUtils.validateAndGetSubjectFromMagicToken(token);
+        final var userID = jwtUtils
+                .validateAndGetSubjectFromMagicToken(token);
+
+        final var user = userService
+                .internal()
+                .getUserById(userID);
+
+        final var email = user.getEmail();
 
         String magicLinkKey = magicLinkKey(email, token);
 
@@ -87,10 +96,6 @@ public class MagicLinkServiceImpl
             throw new DomainException(AuthException.MAGIC_LINK_USED);
         }
 
-        if(!userService.existsByEmail(email)){
-            throw new DomainException(UserException.EMAIL_NOT_FOUND);
-        }
-
         userService.updateLastLogin(email);
 
         redisTemplate
@@ -104,7 +109,7 @@ public class MagicLinkServiceImpl
 
         log.info("Magic link validated: {}", email);
 
-        return jwtUtils.generatePairToken(email);
+        return jwtUtils.generatePairToken(user.getId());
     }
 
     private String magicLinkKey(String email, String token) {

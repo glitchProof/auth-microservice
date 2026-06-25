@@ -26,14 +26,13 @@ public class RefreshServiceImpl
     public AccessToken refresh(TokenRequest tokenRequest) {
         final var refreshToken = tokenRequest.token();
 
-        var subject = jwtUtils
+        var userID = jwtUtils
                 .validateAndGetSubjectFromRefreshToken(refreshToken);
 
-        if(!userService.existsByEmail(subject)) {
-            throw new DomainException(JwtException.INVALID);
-        }
+        var user = userService.internal()
+                .getUserById(userID);
 
-        final String accessToken = jwtUtils.generateAccessToken(subject);
+        final String accessToken = jwtUtils.generateAccessToken(user.getId());
 
         return new AccessToken(accessToken);
     }

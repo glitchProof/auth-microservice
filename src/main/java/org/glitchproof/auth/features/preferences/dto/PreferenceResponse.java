@@ -8,5 +8,8 @@ import org.glitchproof.auth.features.preferences.enums.ThemeMode;
 public record PreferenceResponse(
         Languages   language,
         ThemeMode   theme,
-        String      timezone
+        String      timezone,
+        Boolean     notificationEnabled,
+        Boolean     emailNotificationEnabled,
+        Boolean     pushNotificationEnabled
 ) {}

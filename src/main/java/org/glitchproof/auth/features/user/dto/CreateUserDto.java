@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
+import org.glitchproof.auth.features.user.validators.UniqueEmail;
 
 @Data
 @Builder
@@ -26,6 +27,7 @@ public class CreateUserDto {
 
     @NotBlank
     @Email
+    @UniqueEmail
     String email;
 
     String googleSubId;

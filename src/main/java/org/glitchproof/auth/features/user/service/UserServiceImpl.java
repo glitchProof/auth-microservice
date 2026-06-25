@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.user.entity.User;
 import org.glitchproof.auth.core.exception.DomainException;
-import org.springframework.validation.annotation.Validated;
 import org.glitchproof.auth.features.user.dto.UserResponse;
 import org.glitchproof.auth.features.user.dto.UpsertUserDto;
 import org.glitchproof.auth.features.user.mapper.UserMapper;
@@ -17,6 +16,7 @@ import org.glitchproof.auth.features.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -29,10 +29,11 @@ public class UserServiceImpl
 
     @Override
     public UserResponse getUserByEmail(String email) {
-        return userRepository
-                .findByEmail(email)
-                .map(userMapper::userEntityToUserResponse)
-                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+        var user = internal()
+                .getUserByEmail(email);
+
+        return userMapper
+                .userEntityToUserResponse(user);
     }
 
     @Override
@@ -58,9 +59,8 @@ public class UserServiceImpl
 
     @Override
     public UserResponse updateUser(String email, UpsertUserDto upsertUser) {
-        var user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+        var user = internal()
+                .getUserByEmail(email);
 
         userMapper.upsertUser(upsertUser, user);
 
@@ -74,8 +74,8 @@ public class UserServiceImpl
 
     @Override
     public void updateLastLogin(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+        User user = internal()
+                .getUserByEmail(email);
 
         user.setLastLogin(LocalDateTime.now());
 
@@ -89,17 +89,35 @@ public class UserServiceImpl
     }
 
     @Override
-    public Boolean existsByUsernameOrEmail(String username, String email) {
-        return userRepository.existsByUsernameOrEmail(username, email);
-    }
-
-    @Override
-    public Boolean existsByGoogleSubId(String googleSubId) {
-        return userRepository.existsByGoogleSubId(googleSubId);
-    }
-
-    @Override
     public Boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+
+    /// Internal services class for work with entity
+    /// TODO: Ask this for okey or not
+
+    public InternalServiceImpl internal(){
+        return new InternalServiceImpl();
+    }
+
+    public class InternalServiceImpl
+            implements UserService.InternalService  {
+
+        @Override
+        public User getUserByEmail(String email) {
+            return userRepository
+                    .findByEmail(email)
+                    .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+        }
+
+        @Override
+        public User getUserById(UUID userID) {
+            return userRepository
+                    .findById(userID)
+                    .orElseThrow(() -> new DomainException(UserException.EMAIL_NOT_FOUND));
+        }
+
+
     }
 }

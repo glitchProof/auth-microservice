@@ -4,10 +4,12 @@ import lombok.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.glitchproof.auth.features.auth.validator.PasswordMatch;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@PasswordMatch
 public class RegisterRequest {
     @NotBlank
     @Schema(example = "Jhon Doe")

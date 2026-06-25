@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -29,7 +30,7 @@ public class JwtFilter
     extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService;
+    private final JwtDetailedUserResolver jwtDetailedUserResolver;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
@@ -47,13 +48,14 @@ public class JwtFilter
             }
 
             final String token = authorization.substring(7);
-            final String email = jwtUtils.validateAndGetSubjectFromAccessToken(token);
+            final UUID userID = jwtUtils.validateAndGetSubjectFromAccessToken(token);
 
             SecurityContext securityContext = SecurityContextHolder.getContext();
             Authentication authentication = securityContext.getAuthentication();
 
-            if(email != null && authentication == null){
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if(userID != null && authentication == null){
+                UserDetails userDetails = jwtDetailedUserResolver
+                        .fetchUser(userID);
 
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,

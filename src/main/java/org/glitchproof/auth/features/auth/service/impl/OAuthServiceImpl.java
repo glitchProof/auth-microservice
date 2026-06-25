@@ -52,7 +52,7 @@ public class OAuthServiceImpl
 
         log.info("user sing in with google {}", googleUserDto.email());
 
-        return jwtUtils.generatePairToken(updatedUser.email());
+        return jwtUtils.generatePairToken(updatedUser.id());
     }
 
     private TokenResponse register(GoogleUserDto googleUserDto) {
@@ -64,6 +64,6 @@ public class OAuthServiceImpl
 
         log.info("new user {} registered with google", newUser);
 
-        return jwtUtils.generatePairToken(createdUser.email());
+        return jwtUtils.generatePairToken(createdUser.id());
     }
 }

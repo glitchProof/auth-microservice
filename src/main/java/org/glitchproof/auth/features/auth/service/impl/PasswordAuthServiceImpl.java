@@ -48,7 +48,10 @@ public class PasswordAuthServiceImpl
 
         userService.updateLastLogin(loginRequest.email());
 
-        return jwtUtils.generatePairToken(loginRequest.email());
+        var user = userService.internal()
+                .getUserByEmail(loginRequest.email());
+
+        return jwtUtils.generatePairToken(user.getId());
     }
 
     @RateLimiter(capacity = 5)
@@ -62,21 +65,15 @@ public class PasswordAuthServiceImpl
             throw new DomainException(AuthException.USERNAME_ALREADY_TAKEN);
         }
 
-        if (!registerRequest.getPassword().equals(registerRequest.getPasswordConfirm())) {
-            throw new DomainException(
-                    AuthException.PASSWORD_CONFIRM_NOT_MATCH
-            );
-        }
-
         var newUser = authMapper
                 .registerRequestToCreateUserRequest(registerRequest);
 
         newUser.setProvider(AuthProvider.PASSWORD);
 
-        userService.createUser(newUser);
+        var createdUser = userService.createUser(newUser);
 
         log.info("new user {} registered", newUser);
 
-        return jwtUtils.generatePairToken(registerRequest.getEmail());
+        return jwtUtils.generatePairToken(createdUser.id());
     }
 }

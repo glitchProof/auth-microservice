@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
+import java.util.UUID;
+
 
 @Configuration
 @RequiredArgsConstructor()
@@ -27,9 +29,16 @@ public class SecurityBeansConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-       return username -> userRepository.findByEmail(username)
+       return email -> userRepository.findByEmail(email)
                .map(CustomUserDetails::new)
                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Bean
+    public JwtDetailedUserResolver jwtDetailedUserResolver() {
+        return (UUID userID) -> userRepository.findById(userID)
+                .map(CustomUserDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Profile("!prod")
 public class OpenAPIConfig {
+
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
