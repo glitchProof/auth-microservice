@@ -28,6 +28,7 @@ public class RegisterRequest {
     @Schema(example = "namedking@gmail.com")
     String email;
 
+    @NotBlank
     @Schema(
             description = "Confirmation of password",
             requiredMode = Schema.RequiredMode.REQUIRED

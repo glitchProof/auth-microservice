@@ -54,8 +54,8 @@ public class Preferences {
     User user;
 
     @UpdateTimestamp
-    LocalDateTime updateAt;
+    LocalDateTime updatedAt;
 
     @CreationTimestamp
-    LocalDateTime createAt;
+    LocalDateTime createdAt;
 }
