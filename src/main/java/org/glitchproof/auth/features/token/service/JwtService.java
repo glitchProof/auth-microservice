@@ -27,7 +27,7 @@ public class JwtService {
 
     public String generateToken(
             UUID userID,
-            Map<String, String> claims,
+            Map<String, Object> claims,
             Long expirationTime,
             TokenType type
     ){

@@ -40,19 +40,21 @@ public class UniqueIdFilter
             return address.trim();
         }
 
-        final var xForwardFor = request.getHeader("X-Forwarded-For");
-
-        if (StringUtils.hasText(xForwardFor)) {
-            var ips = xForwardFor.split(",");
-
-            return ips[0].trim();
-        }
-
-        final var realIp = request.getHeader("X-Real-IP");
-
-        if (StringUtils.hasText(realIp)) {
-            return realIp;
-        }
+        /// This commented code is need to configure server inside kubernetes.
+        /// After that these piece of code activate
+//        final var xForwardFor = request.getHeader("X-Forwarded-For");
+//
+//        if (StringUtils.hasText(xForwardFor)) {
+//            var ips = xForwardFor.split(",");
+//
+//            return ips[0].trim();
+//        }
+//
+//        final var realIp = request.getHeader("X-Real-IP");
+//
+//        if (StringUtils.hasText(realIp)) {
+//            return realIp;
+//        }
 
         return null;
     }

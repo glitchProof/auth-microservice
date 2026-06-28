@@ -1,8 +1,11 @@
+CREATE TYPE THEME_MODE AS ENUM ('LIGHT', 'DARK', 'SYSTEM');
+CREATE TYPE LANGUAGE_PREFERENCE AS ENUM ('AZ', 'EN', 'RU');
+
 CREATE TABLE IF NOT EXISTS user_preferences (
     id                          UUID NOT NULL,
     timezone                    VARCHAR,
-    language                    VARCHAR NOT NULL DEFAULT 'EN',
-    theme                       VARCHAR NOT NULL DEFAULT 'SYSTEM',
+    language                    LANGUAGE_PREFERENCE NOT NULL DEFAULT 'EN',
+    theme                       THEME_MODE NOT NULL DEFAULT 'SYSTEM',
     notification_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
     email_notification_enabled  BOOLEAN NOT NULL DEFAULT TRUE,
     push_notification_enabled   BOOLEAN NOT NULL DEFAULT TRUE,

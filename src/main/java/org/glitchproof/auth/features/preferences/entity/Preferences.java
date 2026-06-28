@@ -1,14 +1,16 @@
 package org.glitchproof.auth.features.preferences.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import jakarta.persistence.*;
+import org.hibernate.type.SqlTypes;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
+import org.glitchproof.auth.features.user.entity.User;
 import org.glitchproof.auth.features.preferences.enums.Languages;
 import org.glitchproof.auth.features.preferences.enums.ThemeMode;
-import org.glitchproof.auth.features.user.entity.User;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +18,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_preferences")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -25,20 +28,24 @@ public class Preferences {
     UUID id;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(value = SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "language_preference")
     Languages language = Languages.EN;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(value = SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "theme_mode")
     ThemeMode theme = ThemeMode.SYSTEM;
 
     String timezone;
 
-    @Column(name = "notification_enabled")
+    @Builder.Default
     Boolean notificationEnabled = true;
 
-    @Column(name = "email_notification_enabled")
+    @Builder.Default
     Boolean emailNotificationEnabled = true;
 
-    @Column(name = "push_notification_enabled")
+    @Builder.Default
     Boolean pushNotificationEnabled = true;
 
     @OneToOne(mappedBy = "preferences")
@@ -46,11 +53,9 @@ public class Preferences {
     @EqualsAndHashCode.Exclude
     User user;
 
-    @Column(name = "updated_at")
     @UpdateTimestamp
     LocalDateTime updateAt;
 
-    @Column(name = "created_at")
     @CreationTimestamp
     LocalDateTime createAt;
 }

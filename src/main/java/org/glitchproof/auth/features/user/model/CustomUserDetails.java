@@ -15,7 +15,9 @@ public record CustomUserDetails(User user) implements UserDetails {
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
-                new SimpleGrantedAuthority("ROLE_GUEST")
+                new SimpleGrantedAuthority(
+                        String.format("ROLE_%s", user.getRole().name())
+                )
         );
     }
 

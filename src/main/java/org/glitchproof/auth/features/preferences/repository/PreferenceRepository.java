@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface PreferenceRepository extends JpaRepository<Preferences, UUID> {
-    @Query("select p from Preferences p join fetch p.user u where u.id = :userID")
+    @Query("select p from Preferences p join p.user u where u.id = :userID")
     Preferences findByUserId(UUID userID);
 }

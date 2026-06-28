@@ -1,63 +1,47 @@
 package org.glitchproof.auth.features.auth.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.*;
 import org.glitchproof.auth.core.exception.DomainException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.glitchproof.auth.features.auth.dto.oauth.TokenRequest;
 import org.glitchproof.auth.features.auth.exception.AuthException;
 import org.glitchproof.auth.features.auth.dto.oauth.GoogleUserDto;
 import org.glitchproof.auth.features.auth.service.GoogleTokenVerificationService;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GoogleTokenVerificationServiceImpl
         implements GoogleTokenVerificationService {
-
-    private final String expectedClientId;
-    private final NimbusJwtDecoder jwtDecoder;
-
-    public GoogleTokenVerificationServiceImpl(
-            @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
-            @Value("${app.oauth.google.jwk-set-uri}") String expectedClientId
-    ) {
-        this.expectedClientId = expectedClientId;
-        this.jwtDecoder = NimbusJwtDecoder
-                .withJwkSetUri(issuerUri)
-                .build();
-    }
+    private final NimbusJwtDecoder googleNimbusJwtDecoder;
 
     public GoogleUserDto verify(TokenRequest tokenRequest) {
+        final Jwt jwt;
+
         try {
-            Jwt jwt = jwtDecoder.decode(tokenRequest.token());
-
-            if (!Objects.requireNonNull(jwt.getAudience()).contains(expectedClientId)) {
-                throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
-            }
-
-            final Boolean emailVerified = jwt.getClaim("email_verified");
-
-            if(!Boolean.TRUE.equals(emailVerified)){
-                throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
-            }
-
-            return new GoogleUserDto(
-                    jwt.getSubject(),
-                    jwt.getClaimAsString("email"),
-                    jwt.getClaimAsString("name"),
-                    jwt.getClaimAsString("picture"),
-                    jwt.getClaimAsBoolean("email_verified")
-            );
-        } catch (DomainException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Google token verification failed", e);
+            jwt = googleNimbusJwtDecoder.decode(tokenRequest.token());
+        } catch (BadJwtException e) {
+            log.warn("Google ID token rejected: {}", e.getMessage());
 
             throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
+        } catch (JwtException e) {
+            log.error("Google token verification unavailable (JWKS/infrastructure error)", e);
+
+            throw e;
         }
+
+        if (!Boolean.TRUE.equals(jwt.getClaimAsBoolean("email_verified"))) {
+            throw new DomainException(AuthException.OAUTH_TOKEN_NOT_VALID);
+        }
+
+        return new GoogleUserDto(
+                jwt.getSubject(),
+                jwt.getClaimAsString("email"),
+                jwt.getClaimAsString("name"),
+                jwt.getClaimAsString("picture"),
+                jwt.getClaimAsBoolean("email_verified")
+        );
     }
 }

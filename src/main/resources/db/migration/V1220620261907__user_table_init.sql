@@ -1,3 +1,5 @@
+CREATE TYPE USER_LOGIN_PROVIDER AS ENUM ('PASSWORD', 'MAGIC', 'GOOGLE', 'FACEBOOK');
+
 CREATE TABLE IF NOT EXISTS users (
     id              UUID NOT NULL,
     full_name       VARCHAR NOT NULL,
@@ -7,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     email_verified  BOOLEAN DEFAULT false,
     google_sub_id   VARCHAR,
     preferences_id  UUID,
-    provider        VARCHAR(50) NOT NULL,
+    provider        USER_LOGIN_PROVIDER NOT NULL,
     last_login      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL,

@@ -50,8 +50,8 @@ public class JwtUtils {
             throw e;
         } catch(io.jsonwebtoken.JwtException e) {
             JwtException error = switch(e){
-                case ExpiredJwtException _e -> JwtException.EXPIRED;
-                case MalformedJwtException _e -> JwtException.MALFORMED;
+                case ExpiredJwtException ignored -> JwtException.EXPIRED;
+                case MalformedJwtException ignored -> JwtException.MALFORMED;
                 default -> JwtException.INVALID;
             };
 
@@ -85,7 +85,7 @@ public class JwtUtils {
         return jwtService.generateToken(userId, null, jwtRefreshExpireTime, TokenType.REFRESH);
     }
 
-    public String generateRefreshToken(UUID userId, Map<String, String> claims){
+    public String generateRefreshToken(UUID userId, Map<String, Object> claims){
         return jwtService.generateToken(userId, claims, jwtRefreshExpireTime, TokenType.REFRESH);
     }
 
@@ -148,7 +148,7 @@ public class JwtUtils {
         return jwtService.generateToken(userID, null, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
-    public String generateMagicToken(UUID userID, Map<String, String> claims){
+    public String generateMagicToken(UUID userID, Map<String, Object> claims){
         return jwtService.generateToken(userID, claims, FIFTEEN_MINUTES, TokenType.MAGIC);
     }
 
@@ -157,7 +157,7 @@ public class JwtUtils {
         return jwtService.generateToken(userID, null, jwtAccessExpireTime, TokenType.ACCESS);
     }
 
-    public String generateAccessToken(UUID userID, Map<String, String> claims){
+    public String generateAccessToken(UUID userID, Map<String, Object> claims){
         return jwtService.generateToken(userID, claims, jwtAccessExpireTime, TokenType.ACCESS);
     }
 
