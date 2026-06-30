@@ -17,7 +17,5 @@ import org.glitchproof.auth.features.user.dto.UserResponse;
 public interface UserMapper {
     User createUserRequestToUserEntity(CreateUserDto createUserDto);
 
-    UserResponse userEntityToUserResponse(User user);
-
     void upsertUser(UpsertUserDto upsertUserDto, @MappingTarget User user);
 }

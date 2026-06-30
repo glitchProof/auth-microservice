@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.glitchproof.auth.features.user.enums.AuthProvider;
+import org.glitchproof.auth.features.user.interfaces.OnCredentialsCreate;
 import org.glitchproof.auth.features.user.validators.UniqueEmail;
 
 @Data
@@ -21,7 +22,7 @@ public class CreateUserDto {
     @NotBlank
     String username;
 
-    @NotBlank
+    @NotBlank(groups = { OnCredentialsCreate.class })
     @ToString.Exclude
     String password;
 

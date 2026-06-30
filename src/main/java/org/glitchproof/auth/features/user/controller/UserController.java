@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.glitchproof.auth.features.user.dto.UserResponse;
-import org.glitchproof.auth.features.user.mapper.UserMapper;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.glitchproof.auth.features.user.model.CustomUserDetails;
@@ -15,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @RequestMapping("/api/v1/auth/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserMapper userMapper;
 
     @GetMapping("/me")
     @Operation(
@@ -26,8 +24,7 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         var user = userDetails.user();
-        var userResponse = userMapper
-                .userEntityToUserResponse(user);
+        var userResponse = UserResponse.from(user);
 
         return ResponseEntity.ok(userResponse);
     }

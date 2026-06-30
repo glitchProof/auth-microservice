@@ -1,5 +1,6 @@
 package org.glitchproof.auth.features.auth.dto;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +22,10 @@ public class RegisterRequest {
 
     @NotBlank
     @Schema(example = "WriteBetterPassword123")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+            message = "Password must be valid pattern"
+    )
     String password;
 
     @NotBlank

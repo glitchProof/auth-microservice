@@ -12,7 +12,5 @@ import org.mapstruct.control.MappingControl;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 public interface PreferenceMapper {
-    PreferenceResponse preferenceToPreferenceResponse(Preferences preferences);
-
     void updatePreference(PreferenceUpdateRequest updateRequest, @MappingTarget Preferences preference);
 }

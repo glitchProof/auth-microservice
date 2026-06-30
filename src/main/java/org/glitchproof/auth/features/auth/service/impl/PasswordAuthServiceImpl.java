@@ -30,7 +30,6 @@ public class PasswordAuthServiceImpl
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
-    @RateLimiter(capacity = 5)
     @Override
     public TokenResponse login(PasswordAuthRequest loginRequest) {
         try {
@@ -54,23 +53,14 @@ public class PasswordAuthServiceImpl
         return jwtUtils.generatePairToken(user.getId());
     }
 
-    @RateLimiter(capacity = 5)
     @Override
     public TokenResponse register(RegisterRequest registerRequest) {
-        if(userService.existsByEmail(registerRequest.getEmail())) {
-            throw new DomainException(AuthException.EMAIL_ALREADY_TAKEN);
-        }
-
-        if(userService.existsByUsername(registerRequest.getUsername())) {
-            throw new DomainException(AuthException.USERNAME_ALREADY_TAKEN);
-        }
-
         var newUser = authMapper
                 .registerRequestToCreateUserRequest(registerRequest);
 
         newUser.setProvider(AuthProvider.PASSWORD);
 
-        var createdUser = userService.createUser(newUser);
+        var createdUser = userService.createCredentialsUser(newUser);
 
         log.info("new user {} registered", newUser);
 

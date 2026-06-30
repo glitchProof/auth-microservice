@@ -1,14 +1,17 @@
 package org.glitchproof.auth.core.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.glitchproof.auth.core.dto.ApiExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import jakarta.validation.ConstraintViolationException;
+import org.glitchproof.auth.core.enums.DomainErrorCodes;
+import org.glitchproof.auth.core.dto.ApiExceptionResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -38,6 +41,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
+    // Method level validation of jakarta
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiExceptionResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            String path = violation.getPropertyPath().toString();
+            String field = path.substring(path.lastIndexOf('.') + 1);
+
+            errors.put(field, violation.getMessage());
+        });
+
+        var errorResponse = ApiExceptionResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .violations(errors)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ApiExceptionResponse> handleDomainExceptions(DomainException ex) {
         var errorResponse = ApiExceptionResponse.builder()
@@ -51,11 +75,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
+    // Data integrity exception for db throw constraints exceptions
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiExceptionResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        var errorResponse = ApiExceptionResponse.builder()
+                .code(DomainErrorCodes.SOMETHING_WENT_WRONG.getValue())
+                .status(HttpStatus.CONFLICT.value())
+                .detail(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     // For external bad request exceptions
     @ExceptionHandler({ UsernameNotFoundException.class })
     public ResponseEntity<ApiExceptionResponse> handleUsernameNotFoundException(Exception ex) {
         var errorResponse =  ApiExceptionResponse.builder()
-                .code(10001)
+                .code(DomainErrorCodes.AUTH_EMAIL_TAKEN.getValue())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .detail(ex.getMessage())
                 .timestamp(LocalDateTime.now())

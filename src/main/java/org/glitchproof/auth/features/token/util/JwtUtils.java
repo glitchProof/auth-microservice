@@ -32,14 +32,14 @@ public class JwtUtils {
 
     private final Long FIFTEEN_MINUTES = TimeUnit.MINUTES.toMillis(15);
 
-    private final Supplier<Exception> defaultExceptionSupplier =
+    private final Supplier<? extends RuntimeException> defaultExceptionSupplier =
             () -> new DomainException(JwtException.INVALID);
 
     public void validateOrThrow(
             String token,
             TokenType type,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ){
         try {
             var isValid = jwtService.validate(token, type);
 
@@ -56,7 +56,7 @@ public class JwtUtils {
             };
 
             throw new DomainException(error);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
 
             log.error("JWT validation failed: {}", e.getMessage());
 
@@ -67,8 +67,8 @@ public class JwtUtils {
     public UUID validateAndGetSubject(
             String token,
             TokenType type,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    )  {
         validateOrThrow(token, type, throwCallback);
 
         return jwtService.getSubjectFromToken(token);
@@ -77,7 +77,7 @@ public class JwtUtils {
     // Refresh token validators
     public void validateRefreshToken(
             String token
-    ) throws Exception {
+    )  {
         validateOrThrow(token, TokenType.REFRESH, defaultExceptionSupplier);
     }
 
@@ -91,15 +91,15 @@ public class JwtUtils {
 
     public void validateRefreshToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ) {
         validateOrThrow(token, TokenType.REFRESH, throwCallback);
     }
 
     public UUID validateAndGetSubjectFromRefreshToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ) {
         validateOrThrow(token, TokenType.REFRESH, throwCallback);
 
         return jwtService.getSubjectFromToken(token);
@@ -107,7 +107,7 @@ public class JwtUtils {
 
     public UUID validateAndGetSubjectFromRefreshToken(
             String token
-    ) throws Exception {
+    ) {
         validateOrThrow(token, TokenType.REFRESH, defaultExceptionSupplier);
 
         return jwtService.getSubjectFromToken(token);
@@ -116,21 +116,21 @@ public class JwtUtils {
     // Magic token validators
     public void validateMagicToken(
             String token
-    ) throws Exception {
+    ) {
         validateOrThrow(token, TokenType.MAGIC, defaultExceptionSupplier);
     }
 
     public void validateMagicToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ) {
         validateOrThrow(token, TokenType.MAGIC, throwCallback);
     }
 
     public UUID validateAndGetSubjectFromMagicToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ) {
         validateOrThrow(token, TokenType.MAGIC, throwCallback);
 
         return jwtService.getSubjectFromToken(token);
@@ -138,7 +138,7 @@ public class JwtUtils {
 
     public UUID validateAndGetSubjectFromMagicToken(
             String token
-    ) throws Exception {
+    ) {
         validateOrThrow(token, TokenType.MAGIC, defaultExceptionSupplier);
 
         return jwtService.getSubjectFromToken(token);
@@ -163,21 +163,21 @@ public class JwtUtils {
 
     public void validateAccessToken(
             String token
-    ) throws Exception {
+    )  {
         validateOrThrow(token, TokenType.ACCESS, defaultExceptionSupplier);
     }
 
     public void validateAccessToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    ) {
         validateOrThrow(token, TokenType.ACCESS, throwCallback);
     }
 
     public UUID validateAndGetSubjectFromAccessToken(
             String token,
-            Supplier<Exception> throwCallback
-    ) throws Exception {
+            Supplier<? extends RuntimeException> throwCallback
+    )  {
         validateOrThrow(token, TokenType.ACCESS, throwCallback);
 
         return jwtService.getSubjectFromToken(token);
@@ -185,7 +185,7 @@ public class JwtUtils {
 
     public UUID validateAndGetSubjectFromAccessToken(
             String token
-    ) throws Exception {
+    )  {
         validateOrThrow(token, TokenType.ACCESS, defaultExceptionSupplier);
 
         return jwtService.getSubjectFromToken(token);

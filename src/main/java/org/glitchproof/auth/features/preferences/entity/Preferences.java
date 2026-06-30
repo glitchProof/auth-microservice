@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import org.hibernate.type.SqlTypes;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.CreationTimestamp;
 import org.glitchproof.auth.features.user.entity.User;
@@ -24,14 +23,15 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Preferences {
     @Id
-    @UuidGenerator
     UUID id;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(value = SqlTypes.NAMED_ENUM)
     @Column(columnDefinition = "language_preference")
     Languages language = Languages.EN;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(value = SqlTypes.NAMED_ENUM)
     @Column(columnDefinition = "theme_mode")
@@ -48,7 +48,9 @@ public class Preferences {
     @Builder.Default
     Boolean pushNotificationEnabled = true;
 
-    @OneToOne(mappedBy = "preferences")
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     User user;

@@ -3,6 +3,8 @@ package org.glitchproof.auth.features.auth.service.impl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.glitchproof.auth.core.enums.DomainExceptions;
+import org.glitchproof.auth.features.user.entity.User;
 import org.springframework.stereotype.Service;
 import org.glitchproof.auth.features.token.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,15 +36,21 @@ public class MagicLinkServiceImpl
 
     @Override
     public void send(MagicLinkRequest magicLinkRequest) {
+        User user;
         final String email = magicLinkRequest.email();
 
-        final var user = userService
-                .internal()
-                .getUserByEmail(email);
+        try {
+            user = userService
+                    .internal()
+                    .getUserByEmail(email);
 
-        if(user == null || !user.getEmailVerified()){
-            log.warn("Magic link can not be sent to {}, email not found", email);
+            if(!user.canUseMagicLinkLogin()){
+                log.warn("Magic link can not be sent to {}, email not found", email);
 
+                return;
+            }
+        } catch (Exception e){
+            // Return nothing for attackers can not able to enumerates accounts
             return;
         }
 
@@ -69,7 +77,6 @@ public class MagicLinkServiceImpl
     }
 
     @Override
-    @SneakyThrows
     public TokenResponse validate(String token) {
         final var userID = jwtUtils
                 .validateAndGetSubjectFromMagicToken(token);
@@ -100,10 +107,10 @@ public class MagicLinkServiceImpl
 
         redisTemplate
                 .opsForValue()
-                .setIfPresent(
+                .set(
                         magicLinkKey,
                         MagicLinkStatus.USED.name(),
-                        5,
+                        15,
                         TimeUnit.MINUTES
                 );
 

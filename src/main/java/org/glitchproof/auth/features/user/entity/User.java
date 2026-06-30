@@ -2,7 +2,6 @@ package org.glitchproof.auth.features.user.entity;
 
 import lombok.*;
 
-import java.sql.SQLType;
 import java.util.UUID;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -42,6 +41,7 @@ public class User {
     String email;
 
     @Column( nullable = false)
+    @Builder.Default
     Boolean emailVerified = false;
 
     @Column(unique = true)
@@ -66,8 +66,7 @@ public class User {
     )
     PlatformRole role = PlatformRole.USER;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "preferences_id")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Preferences preferences;
@@ -94,6 +93,8 @@ public class User {
         if(preferences == null){
             preferences = new Preferences();
         }
+        // For getting user id for @MapsId
+        preferences.setUser(this);
     }
 
 

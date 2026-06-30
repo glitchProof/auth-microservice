@@ -16,6 +16,7 @@ import org.glitchproof.auth.features.auth.service.OAuthService;
 import org.glitchproof.auth.features.auth.dto.oauth.TokenRequest;
 import org.glitchproof.auth.features.auth.dto.oauth.GoogleUserDto;
 import org.glitchproof.auth.features.auth.service.GoogleTokenVerificationService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -60,7 +61,7 @@ public class OAuthServiceImpl
 
         newUser.setProvider(AuthProvider.GOOGLE);
 
-        var createdUser = userService.createUser(newUser);
+        var createdUser = userService.createOAuthUser(newUser);
 
         log.info("new user {} registered with google", newUser);
 

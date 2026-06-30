@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum DomainErrorCodes {
+    SOMETHING_WENT_WRONG(10000),
 
     // ── JWT -- 101xx
     JWT_INVALID(10100),
@@ -24,8 +25,10 @@ public enum DomainErrorCodes {
 
     // ── USER -- 103xx
     USER_ALREADY_EXISTS(10300),
-    USER_EMAIL_NOT_FOUND(10301);
+    USER_EMAIL_NOT_FOUND(10301),
 
+    // -- PREFERENCES -- 104xx
+    PREFERENCES_NOT_FOUND(10401);
 
     private final Integer value;
 }
